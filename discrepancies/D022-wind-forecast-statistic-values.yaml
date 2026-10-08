@@ -1,0 +1,57 @@
+id: D022
+slug: wind-forecast-statistic-values
+title: Wind Generation Forecast lists statistic values AVG, MIN, MAX, SDV; the schema allows SAMPLE, MEAN,
+  SD, ME, MAE, RMS
+kind: enumeration-value
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Notifications Messages / Wind Generation Forecast
+  location: AnalogValue table
+  quote: statistic Y String Statistic used to create data Enumeration (AVG, MIN, MAX, SDV)
+  url: https://developer.ercot.com/applications/ews/Notifications%20Messages/Wind%20Generation%20Forecast/
+schema_says:
+  file: ErcotForecast.xsd
+  line: 100
+  rule: AnalogValue/@statistic is required and restricted to SAMPLE, MEAN, SD, ME, MAE and RMS, in ErcotForecast.xsd
+    and ErcotSolarQSEForecast.xsd alike.
+do: Expect and write SAMPLE, MEAN, SD, ME, MAE or RMS. ERCOT's own solar example uses MEAN.
+lookup:
+  messages:
+  - ForecastPayload
+  - WindForecast
+  elements:
+  - AnalogValue
+  - statistic
+  values:
+  - AVG
+  - MIN
+  - MAX
+  - SDV
+  - MEAN
+  endpoints:
+  - Notifications
+reproducer:
+  invalid: |
+    <ForecastPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site duns="0000000000000" name="WIND_A" qseid="QSE1">SITE_A</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue statistic="AVG" timeStamp="2026-10-15T10:00:00-05:00" type="STWPF" units="MW">1.6</AnalogValue>
+      </ForecastSet>
+    </ForecastPayload>
+  valid: |
+    <ForecastPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site duns="0000000000000" name="WIND_A" qseid="QSE1">SITE_A</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue statistic="MEAN" timeStamp="2026-10-15T10:00:00-05:00" type="STWPF" units="MW">1.6</AnalogValue>
+      </ForecastSet>
+    </ForecastPayload>
+probes:
+  portal:
+    page: Wind%20Generation%20Forecast
+    text: Enumeration (AVG, MIN, MAX, SDV)
+  schema:
+    file: ErcotForecast.xsd
+    pattern: <xs:enumeration value="SAMPLE"/>

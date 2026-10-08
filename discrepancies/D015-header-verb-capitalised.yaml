@@ -1,0 +1,73 @@
+id: D015
+slug: header-verb-capitalised
+title: Several request tables give Header/Verb capitalised (Get, Change, Cancel, Reply, Created); the
+  enumeration is lower case
+kind: enumeration-value
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Utility Interface Messages / Get SASM ID List; Outage Scheduling Messages / Outage Update, Outage
+    Cancellation, Outage Query; Change Active Notification URL; Confirmed and Unconfirmed Trades
+  location: request and response tables
+  quote: Header/Verb Get Header/Noun SASMIDList
+  url: https://developer.ercot.com/applications/ews/Utility%20Interface%20Messages/Get%20SASM%20ID%20List/
+schema_says:
+  file: Message.xsd
+  line: 77
+  rule: 'HeaderType/Verb is an enumeration of fifteen lower-case values: cancel, canceled, change, changed,
+    create, created, close, closed, delete, deleted, get, reply, submit, update, updated.'
+do: Write the verb in lower case.
+lookup:
+  messages:
+  - RequestMessage
+  - OutageSet
+  elements:
+  - Verb
+  - Header
+  values:
+  - Get
+  - Change
+  - Cancel
+  - Reply
+  - Created
+  - get
+  - change
+  endpoints:
+  - Outage Scheduling Service
+  - Utility Interface
+reproducer:
+  invalid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>Get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+  valid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+probes:
+  portal:
+    page: Get%20SASM%20ID%20List
+    text: Header/Verb Get Header/Noun SASMIDList
+  schema:
+    file: Message.xsd
+    pattern: <xsd:enumeration value="change"/>
+notes: Get SASM ID List itself was withdrawn with RTC+B; the same capitalisation remains on the Outage
+  pages.

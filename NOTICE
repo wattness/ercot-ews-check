@@ -1,0 +1,24 @@
+ercot-ews-check
+Copyright 2026 Wattness
+
+This project is not affiliated with or endorsed by the Electric Reliability
+Council of Texas, Inc. (ERCOT). "ERCOT" is a trademark of ERCOT; this project
+uses the name only to say which market's interfaces it works with, and uses no
+ERCOT logo.
+
+The vendor/ directory contains files published by ERCOT, and schemas published
+by OASIS and W3C that ERCOT distributes with its own. They are not covered by
+this project's licence. The ERCOT files are redistributed under section 5 of
+ERCOT's Website User Agreement (https://www.ercot.com/help/terms):
+
+  "The publicly available contents of this website may be used, reproduced,
+  and redistributed, provided that the contents are not modified and that you
+  maintain all copyright and other notices contained in the contents,
+  including this Agreement."
+
+They are kept unmodified with their notices, and the Agreement is reproduced in
+vendor/ERCOT-TERMS-OF-USE.txt. vendor/NOTICE gives the details, the OASIS
+notices and the W3C licence.
+
+The discrepancy catalogue (discrepancies/, docs/discrepancies.md) quotes short
+passages of ERCOT's documentation for identification, each with its source.

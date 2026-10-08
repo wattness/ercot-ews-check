@@ -1,0 +1,61 @@
+id: D012
+slug: error-severity-lowercase
+title: A BidSet response sample writes <severity>error</severity>; the enumeration is upper case
+kind: enumeration-value
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Service
+  location: Offer and bid set submission, response example
+  quote: <error><severity>error</severity><text>Unknown bid type XYZ</text></error>
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Service/#offer-and-bid-set-submission
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 367
+  rule: Error/severity is restricted to ERROR, WARNING and INFORMATIVE.
+do: Compare severity case-insensitively when reading; write it in upper case.
+lookup:
+  messages:
+  - BidSet
+  elements:
+  - severity
+  - error
+  values:
+  - error
+  - ERROR
+  - INFORMATIVE
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <EnergyOnlyOffer>
+        <mRID>QSE1.20261015.EOO.HB_HOUSTON.eoo01</mRID>
+        <status>ERRORS</status>
+        <error>
+          <severity>error</severity>
+          <text>Invalid settlement point</text>
+        </error>
+      </EnergyOnlyOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <EnergyOnlyOffer>
+        <mRID>QSE1.20261015.EOO.HB_HOUSTON.eoo01</mRID>
+        <status>ERRORS</status>
+        <error>
+          <severity>ERROR</severity>
+          <text>Invalid settlement point</text>
+        </error>
+      </EnergyOnlyOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Market%20Transaction%20Service
+    text: <severity>error</severity>
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:enumeration value="INFORMATIVE"/>
+notes: The Error Handling prose calls the third level 'informational'; the schema value is INFORMATIVE.

@@ -1,0 +1,62 @@
+id: D011
+slug: status-error-singular
+title: Rejected-bid samples write <status>ERROR</status>; the enumeration has ERRORS
+kind: enumeration-value
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Notifications Messages / Offer and Bid Set Errors; Market Transaction Service
+  location: XML examples of rejected bids
+  quote: <status>ERROR</status>
+  url: https://developer.ercot.com/applications/ews/Notifications%20Messages/Offer%20and%20Bid%20Set%20Errors/
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 310
+  rule: TransactionStatusType enumerates SUBMITTED, ACCEPTED, PENDING, REJECTED, ERRORS, UNCONFIRMED,
+    CANCELED and ACKNOWLEDGED. There is no ERROR.
+do: When reading replies and notifications, treat ERROR, ERRORS and REJECTED alike rather than discard
+  the message. Never write ERROR.
+lookup:
+  messages:
+  - BidSet
+  - Offer and Bid Set Errors
+  elements:
+  - status
+  values:
+  - ERROR
+  - ERRORS
+  endpoints:
+  - Notifications
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <EnergyOnlyOffer>
+        <mRID>QSE1.20261015.EOO.HB_HOUSTON.eoo01</mRID>
+        <status>ERROR</status>
+        <error>
+          <severity>ERROR</severity>
+          <text>Invalid settlement point</text>
+        </error>
+      </EnergyOnlyOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <EnergyOnlyOffer>
+        <mRID>QSE1.20261015.EOO.HB_HOUSTON.eoo01</mRID>
+        <status>ERRORS</status>
+        <error>
+          <severity>ERROR</severity>
+          <text>Invalid settlement point</text>
+        </error>
+      </EnergyOnlyOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Offer%20and%20Bid%20Set%20Errors
+    text: <status>ERROR</status>
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:enumeration value="ERRORS"/>

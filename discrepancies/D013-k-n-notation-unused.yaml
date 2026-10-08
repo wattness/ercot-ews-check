@@ -1,0 +1,25 @@
+id: D013
+slug: k-n-notation-unused
+title: The 'K, N' marker is defined but no table uses it
+kind: documentation
+resolution: neither
+status: open
+ercot_says:
+  page: Services Organization
+  location: Market Products
+  quote: There are some exception cases where identified key fields are identified as not being required
+    (e.g. expiration), and are notated as 'K, N'.
+  url: https://developer.ercot.com/applications/ews/Services%20Organization/#market-products
+schema_says:
+  rule: Not a schema matter.
+do: Expect Y, N, K or a condition in the Req column. A parser may accept 'K, N' but should not depend
+  on it.
+lookup:
+  elements:
+  - expirationTime
+  values:
+  - K, N
+probes:
+  portal:
+    page: Services%20Organization
+    text: are notated as 'K, N'

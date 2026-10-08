@@ -1,0 +1,32 @@
+id: D016
+slug: header-revision-default
+title: Header/Revision 'should be 1 by default'; the schema default is 001
+kind: default-value
+resolution: neither
+status: open
+ercot_says:
+  page: Services Organization
+  location: Message Header
+  quote: 'Revision: To indicate the revision of the message definition. This should be ''1'' by default.'
+  url: https://developer.ercot.com/applications/ews/Services%20Organization/#message-header
+schema_says:
+  file: Message.xsd
+  line: 95
+  rule: Revision is xsd:string with default="001"; any string validates.
+do: Pick one value and send it consistently. ERCOT's samples use at least seven (1, 001, 1.0 and others).
+lookup:
+  messages:
+  - RequestMessage
+  elements:
+  - Revision
+  - Header
+  values:
+  - '1'
+  - '001'
+probes:
+  portal:
+    page: Services%20Organization
+    text: This should be '1' by default.
+  schema:
+    file: Message.xsd
+    pattern: name="Revision" type="xsd:string" default="001"

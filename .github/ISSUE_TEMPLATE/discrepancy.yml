@@ -1,0 +1,36 @@
+name: Discrepancy
+description: ERCOT's EWS documentation, an example, or a schema contradicts another ERCOT source
+labels: [discrepancy]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: ERCOT source
+      description: Page URL (developer.ercot.com) or file and commit (ercot/api-specs)
+    validations:
+      required: true
+  - type: textarea
+    id: says
+    attributes:
+      label: What ERCOT says
+      description: The exact sentence, table row or example, quoted briefly
+    validations:
+      required: true
+  - type: textarea
+    id: schema
+    attributes:
+      label: What the schema (or other ERCOT source) says
+      description: File and line, e.g. ErcotCommonTypes.xsd:689, or Protocols section
+    validations:
+      required: true
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal document
+      description: XML that shows the failure, and the output of `ercot-ews-check check`
+      render: xml
+  - type: input
+    id: upstream
+    attributes:
+      label: Reported to ERCOT
+      description: Link to an ercot/api-specs issue or pull request, if any

@@ -1,0 +1,55 @@
+id: D023
+slug: wind-forecast-ltwpf
+title: Wind Generation Forecast says WGRs can submit an LTWPF; no interface or type exists for it
+kind: enumeration-value
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Notifications Messages / Wind Generation Forecast
+  location: purpose
+  quote: Additionally the purpose is to allow WGRs to submit the LTWPF for their Resources to ERCOT and
+    their respective QSE.
+  url: https://developer.ercot.com/applications/ews/Notifications%20Messages/Wind%20Generation%20Forecast/
+schema_says:
+  file: ErcotForecast.xsd
+  line: 84
+  rule: AnalogValue/@type allows STWPF, WGRPP, TE, PR, WS, WD, PWR and BPAVG. LTWPF appears in no schema,
+    and this page documents a notification ERCOT sends, not a submission.
+do: Do not build an LTWPF submission; EWS has none.
+lookup:
+  messages:
+  - ForecastPayload
+  - WindForecast
+  elements:
+  - AnalogValue
+  - type
+  values:
+  - LTWPF
+  - STWPF
+  - WGRPP
+  endpoints:
+  - Notifications
+reproducer:
+  invalid: |
+    <ForecastPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site duns="0000000000000" name="WIND_A" qseid="QSE1">SITE_A</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue statistic="MEAN" timeStamp="2026-10-15T10:00:00-05:00" type="LTWPF" units="MW">1.6</AnalogValue>
+      </ForecastSet>
+    </ForecastPayload>
+  valid: |
+    <ForecastPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site duns="0000000000000" name="WIND_A" qseid="QSE1">SITE_A</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue statistic="MEAN" timeStamp="2026-10-15T10:00:00-05:00" type="STWPF" units="MW">1.6</AnalogValue>
+      </ForecastSet>
+    </ForecastPayload>
+probes:
+  portal:
+    page: Wind%20Generation%20Forecast
+    text: allow WGRs to submit the LTWPF for their Resources
+  schema:
+    file: ErcotForecast.xsd
+    pattern: <xs:enumeration value="WGRPP"/>

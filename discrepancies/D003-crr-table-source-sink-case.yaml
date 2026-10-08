@@ -1,0 +1,93 @@
+id: D003
+slug: crr-table-source-sink-case
+title: CRR table capitalises Source, Sink and MinimumReservationPrice/Price; the schema declares source,
+  sink and price
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / PTP Obligation with Links to Option (CRR)
+  location: Message Element table
+  quote: Source K string Source settlement point ... Sink K string Sink settlement point
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/PTP%20Obligation%20with%20Links%20to%20Option%20%28CRR%29/
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 388
+  rule: The CRR type declares source and sink, and MinimumPrice declares price, in lower case. XML names
+    are case-sensitive.
+do: Write <source>, <sink> and <price>.
+lookup:
+  products:
+  - CRR
+  messages:
+  - BidSet
+  elements:
+  - source
+  - sink
+  - Source
+  - Sink
+  - price
+  - Price
+  - MinimumReservationPrice
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <CRR>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <crrId>CRR_1</crrId>
+        <offerId>100</offerId>
+        <crrAccountHolderId>CRRAH1</crrAccountHolderId>
+        <Source>HB_WEST</Source>
+        <Sink>HB_HOUSTON</Sink>
+        <CapacitySchedule>
+          <TmPoint>
+            <time>2026-10-15T06:00:00-05:00</time>
+            <ending>2026-10-15T22:00:00-05:00</ending>
+            <value1>20.0</value1>
+          </TmPoint>
+        </CapacitySchedule>
+        <MinimumReservationPrice>
+          <startTime>2026-10-15T06:00:00-05:00</startTime>
+          <endTime>2026-10-15T22:00:00-05:00</endTime>
+          <price>12.00</price>
+        </MinimumReservationPrice>
+        <NOIEPeakLoadForecast>0.0</NOIEPeakLoadForecast>
+      </CRR>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <CRR>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <crrId>CRR_1</crrId>
+        <offerId>100</offerId>
+        <crrAccountHolderId>CRRAH1</crrAccountHolderId>
+        <source>HB_WEST</source>
+        <sink>HB_HOUSTON</sink>
+        <CapacitySchedule>
+          <TmPoint>
+            <time>2026-10-15T06:00:00-05:00</time>
+            <ending>2026-10-15T22:00:00-05:00</ending>
+            <value1>20.0</value1>
+          </TmPoint>
+        </CapacitySchedule>
+        <MinimumReservationPrice>
+          <startTime>2026-10-15T06:00:00-05:00</startTime>
+          <endTime>2026-10-15T22:00:00-05:00</endTime>
+          <price>12.00</price>
+        </MinimumReservationPrice>
+        <NOIEPeakLoadForecast>0.0</NOIEPeakLoadForecast>
+      </CRR>
+    </BidSet>
+probes:
+  portal:
+    page: Links%20to%20Option%20%28CRR%29
+    text: Sink K string Sink settlement point
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:element name="source"

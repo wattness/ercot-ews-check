@@ -1,0 +1,47 @@
+id: D019
+slug: resparametersset-mixed-types
+title: ResParametersSet is described as holding requests of different types; the schema allows one type
+  per set
+kind: cardinality
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Resource Parameter Transaction Service
+  location: Interfaces Provided
+  quote: A single container class 'ResParametersSet' is used to hold a request for changing resource parameters
+    within the Payload section of the message, where each of the requests may be of a different type.
+  url: https://developer.ercot.com/applications/ews/Resource%20Parameter%20Transaction%20Service/#interfaces-provided
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 652
+  rule: ResParametersSet is an xs:choice of GenResourceParameters, ControllableLoadResource, NonControllableLoadResource
+    and ResourceParameters, each unbounded. Many requests of one type validate; two types do not.
+do: Send one parameter type per ResParametersSet.
+lookup:
+  messages:
+  - ResParametersSet
+  elements:
+  - GenResourceParameters
+  - ResourceParameters
+  - ControllableLoadResource
+  - NonControllableLoadResource
+  endpoints:
+  - Resource Parameter Transaction Service
+reproducer:
+  invalid: |
+    <ResParametersSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <GenResourceParameters/>
+      <ControllableLoadResource/>
+    </ResParametersSet>
+  valid: |
+    <ResParametersSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <GenResourceParameters/>
+      <GenResourceParameters/>
+    </ResParametersSet>
+probes:
+  portal:
+    page: Resource%20Parameter%20Transaction%20Service
+    text: where each of the requests may be of a different type
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:choice>\s*<xs:element name="GenResourceParameters"

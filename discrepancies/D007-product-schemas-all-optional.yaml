@@ -1,0 +1,62 @@
+id: D007
+slug: product-schemas-all-optional
+title: Every product payload field is optional in the schema; the tables mark many required
+kind: required-field
+resolution: prose-wins
+status: open
+ercot_says:
+  page: Services Organization
+  location: Market Products
+  quote: The XML schema provided to describe product types has all fields optional. This is because the
+    schemas can be used for 'create', 'get' and 'cancel' operations.
+  url: https://developer.ercot.com/applications/ews/Services%20Organization/#market-products
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 428
+  rule: Every child of ASOnlyOffer, COP, EnergyBid, EnergyOnlyOffer and the other payloads is minOccurs="0";
+    an empty <ASOnlyOffer/> validates.
+do: Check a create against the Y and K markers in each product's Message Element table. `ercot-ews-check
+  check` does this.
+lookup:
+  products:
+  - ASOnlyOffer
+  - COP
+  - EnergyBid
+  - EnergyOnlyOffer
+  - ASOffer
+  - PTPObligation
+  messages:
+  - BidSet
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer/>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Up</asType>
+        <bidID>regup01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>15.50</y1value>
+          </CurveData>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Services%20Organization
+    text: The XML schema provided to describe product types has all fields optional.
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:complexType name="ASOnlyOffer">

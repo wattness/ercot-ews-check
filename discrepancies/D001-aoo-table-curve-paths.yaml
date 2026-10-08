@@ -1,0 +1,74 @@
+id: D001
+slug: aoo-table-curve-paths
+title: AOO table names ASOnlyPriceCurve/xvalue and /yvalue; the schema nests CurveData/xvalue and y1value
+kind: element-path
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / Ancillary Service Only Offer (AOO)
+  location: Message Element table
+  quote: ASOnlyPriceCurve/xvalue Y float Megawatts ... ASOnlyPriceCurve/yvalue Y float $/MWh
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Ancillary%20Service%20Only%20Offer%20%28AOO%29/
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 689
+  rule: ASOnlyPriceCurve is a sequence of startTime, endTime and CurveData; CurveData holds xvalue and
+    y1value. No ERCOT schema declares yvalue.
+do: Write <CurveData><xvalue/><y1value/></CurveData> inside each ASOnlyPriceCurve.
+lookup:
+  products:
+  - ASOnlyOffer
+  messages:
+  - BidSet
+  elements:
+  - ASOnlyPriceCurve
+  - xvalue
+  - yvalue
+  - y1value
+  - CurveData
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Up</asType>
+        <bidID>regup01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <xvalue>10.0</xvalue>
+          <yvalue>15.50</yvalue>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Up</asType>
+        <bidID>regup01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>15.50</y1value>
+          </CurveData>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Ancillary%20Service%20Only%20Offer%20%28AOO%29
+    text: ASOnlyPriceCurve/yvalue Y float
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:complexType name="ASOnlyPriceCurve">
+reported:
+- https://github.com/ercot/api-specs/issues/149

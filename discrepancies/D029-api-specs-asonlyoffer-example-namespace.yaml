@@ -1,0 +1,78 @@
+id: D029
+slug: api-specs-asonlyoffer-example-namespace
+title: api-specs ews/examples/ASOnlyOffer-Example.xml puts BidSet in the message namespace
+kind: namespace
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'github.com/ercot/api-specs: ews/examples/ASOnlyOffer-Example.xml'
+  location: lines 6 and 20-21
+  quote: <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message"> ... <Payload>
+    <BidSet>
+  observed: BidSet declares no namespace, so it takes the message namespace declared on RequestMessage.
+  url: https://github.com/ercot/api-specs/blob/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/examples/ASOnlyOffer-Example.xml
+schema_says:
+  file: Message.xsd
+  line: 57
+  rule: Payload holds xsd:any namespace="##other", which excludes the message namespace. BidSet belongs
+    to http://www.ercot.com/schema/2007-06/nodal/ews.
+do: Declare xmlns="http://www.ercot.com/schema/2007-06/nodal/ews" on BidSet (or use a prefix bound to
+  it).
+lookup:
+  products:
+  - ASOnlyOffer
+  messages:
+  - RequestMessage
+  - BidSet
+  elements:
+  - Payload
+  - BidSet
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>create</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+      <Payload>
+        <BidSet>
+          <tradingDate>2026-10-15</tradingDate>
+        </BidSet>
+      </Payload>
+    </RequestMessage>
+  valid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>create</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+      <Payload>
+        <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+          <tradingDate>2026-10-15</tradingDate>
+        </BidSet>
+      </Payload>
+    </RequestMessage>
+probes:
+  file:
+    path: api-specs/ews/examples/ASOnlyOffer-Example.xml
+    sha256: 6b7dd7242559acce710b96ee29fe79629ffb9335d008fe5e657670f00b02e031
+  schema:
+    file: Message.xsd
+    pattern: <xsd:any namespace="##other" processContents="skip"
+reported:
+- https://github.com/ercot/api-specs/pull/148
+notes: A one-line fix was proposed upstream; the pull request was closed without merging on 2026-10-06.

@@ -1,0 +1,298 @@
+{
+  "api_specs_commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+  "files": [
+    {
+      "path": "ercot/api-specs/ews/README.md",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/README.md",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 52,
+      "sha256": "2f0c4e14f721831651d391ee812fe8fd3e497879effda21f21c21f7fb3f3b4c1"
+    },
+    {
+      "path": "ercot/api-specs/ews/examples/ASOnlyOffer-Example.xml",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/examples/ASOnlyOffer-Example.xml",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 8484,
+      "sha256": "6b7dd7242559acce710b96ee29fe79629ffb9335d008fe5e657670f00b02e031"
+    },
+    {
+      "path": "ercot/api-specs/ews/examples/AwardedASOnly-Example.xml",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/examples/AwardedASOnly-Example.xml",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 106680,
+      "sha256": "19c80a00799e4304b0f99670428f0caa42b01e6f79c44f0d928d101c8bfcedea"
+    },
+    {
+      "path": "ercot/api-specs/ews/examples/GenResParams-SOC-Example.xml",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/examples/GenResParams-SOC-Example.xml",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 3580,
+      "sha256": "8d7cb416f442795655f7590f070faf8033b50d385b5e9e6eaf1e79479a15e8eb"
+    },
+    {
+      "path": "ercot/api-specs/ews/wsdls/Nodal.wsdl",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/wsdls/Nodal.wsdl",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 3225,
+      "sha256": "f0d4c524353a288217470c6b5f81c53d3997dad7bbf386f6444fc083ed99bdd5"
+    },
+    {
+      "path": "ercot/api-specs/ews/wsdls/Notification.wsdl",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/wsdls/Notification.wsdl",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 2786,
+      "sha256": "048405886253acf0af21905cef3ce228024f3d2308ed55c857680ea9d515d06a"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotAwardTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotAwardTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 15073,
+      "sha256": "b6e345124c2799ccc5d9893d6e38758efda2e86766c4f2b1f7f15a8aa5677143"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotAwards.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotAwards.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 3284,
+      "sha256": "aa234949e12af2047d6c5e94d72ecb88c1a99f4deed4662b237cf7c81d415577"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotCommonTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotCommonTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 54582,
+      "sha256": "adc78458c8a25402442cdd9b13cb8547dece4ff7b72f8d9ff86ad7fa6ad0742f"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotDisputes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotDisputes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 1340,
+      "sha256": "9a8ab65a050e9dd833a4b62d4914d3c42cd45057e08053252d70d2979120edf6"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotDisputesTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotDisputesTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 4370,
+      "sha256": "231714c1d99842069d62b238b355f86e6aa7bcca89b3985f5b3c39c68c141004"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotEventTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotEventTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 2842,
+      "sha256": "831a43cc6b3e6524af9bbfb1481bc8168e2120bde490c93806c55c5f994d7fd5"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotEvents.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotEvents.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 1804,
+      "sha256": "91dfdee709d12dc1b39c61b82e20e6b99d8a2dc01d45383c20e6187ebb239810"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotForecast.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotForecast.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 5388,
+      "sha256": "3b5be7c76fb771ddf0087de91223098fc404c4de346788b922049e3be57155f0"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotGetNotifications.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotGetNotifications.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 4004,
+      "sha256": "934756f357142033c4e24b1b4c0596b87c39edc37797fb2bb2e1c740e9544cc1"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotInformation.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotInformation.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 13242,
+      "sha256": "5771d2147e08d26bc58d69a44ca830f168aabbaeb9949cb9912574a09b97687f"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotInformation2.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotInformation2.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 4447,
+      "sha256": "4a9d324a682a22b9836682cf9fa9acc477b16ee86bc1e82c5c6f9f42f6396fec"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotInformation2Types.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotInformation2Types.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 7245,
+      "sha256": "04c3227834bb852cda2571fe0b8569f4dd810185f0df9f5434083765c0e2c318"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotInformationTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotInformationTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 50542,
+      "sha256": "b6d8fb79d79a208097d6bc49c67fae0e510692974d6077677e753e555298db59"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotOutageTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotOutageTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 36888,
+      "sha256": "41ab49d29329ad705898b37528389be65e666df0553215dc1da60568eeb534f5"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotOutages.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotOutages.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 2802,
+      "sha256": "5d7c669e4e909b854d1e87e38bf88115f815795de24a821154fd705b05db3c25"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotReport.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotReport.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 1830,
+      "sha256": "3e99d81e7db2fcfc43b8f6c111f0a56b3aeb054332a3c5087f8ad53a4571cc19"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotReportTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotReportTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 2972,
+      "sha256": "5075e4f0fcebd96d50378d63dbc1fb85e01ad65a5c6bbb5cf4366178b40448c4"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotSolarQSEForecast.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotSolarQSEForecast.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 4478,
+      "sha256": "89e22763df257f5669d874b4b39098c609f01113dbd43ef7535596a5a036c46f"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotTextReason.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotTextReason.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 1227,
+      "sha256": "03853e2803f76abe9266379aefa4b793ccd1407335d434c4ca8a8cd74b55882c"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotTextReasonTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotTextReasonTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 2210,
+      "sha256": "261efc0137e0a8d38046dc1f9aa95724ade1d4716f207e55f9680df49925c7f8"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotTransactionTypes.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotTransactionTypes.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 32288,
+      "sha256": "424cb53c3f0e6a8d90203411b1ce9300497ebd43a9ebac80a31e617b5e4c782e"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/ErcotTransactions.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/ErcotTransactions.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 3545,
+      "sha256": "85ac21b71c170b940a39158e1b0c02c4f0b6fffda8145a2554e28844521ed445"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/Message.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/Message.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 7064,
+      "sha256": "94fb9081cf3ce79bf985420981f5bf8149ffb673c177f8f356594c9ea5d825b6"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/Notification.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/Notification.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 3305,
+      "sha256": "dfd9550e9ac8327d365af06fc7b940b293f71f96697868d1424af7fc9214b657"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/WSS200401wssecurity-secext-10.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/WSS200401wssecurity-secext-10.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 11326,
+      "sha256": "bb73391ca54df3d6ba0bc989eaa8c9213cc04f336a18f8315f6af78811753bb2"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/WSS200401wssecurity-utility-10.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/WSS200401wssecurity-utility-10.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 6380,
+      "sha256": "342aee10b4dc30144e740e00fb2a2cdae3a1448852118834478a2cdd331044af"
+    },
+    {
+      "path": "ercot/api-specs/ews/xsds/xmldsig-core-schema.xsd",
+      "url": "https://raw.githubusercontent.com/ercot/api-specs/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/xsds/xmldsig-core-schema.xsd",
+      "commit": "7e785be50f0b0e5462f7d0e700ba82289f25390e",
+      "retrieved": "2026-10-07",
+      "bytes": 10293,
+      "sha256": "bf69e3e333f2bd42fce97e284eb5122fecca58adca1d1d2d5f758af899baa4ae"
+    },
+    {
+      "path": "ercot/developer.ercot.com/search/search_index.json",
+      "url": "https://developer.ercot.com/search/search_index.json",
+      "retrieved": "2026-10-07",
+      "bytes": 1284471,
+      "sha256": "30ddb2332cacf52e056f267620cdf56247fd281addae84e2e31895877eca445e"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/ASOffer_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/ASOffer_Structure.png",
+      "retrieved": "2026-10-07",
+      "bytes": 6084,
+      "sha256": "498ed5ee2e6158b73811781a420210dc22c3d04c665d96199b56fe5b65f1aa81"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/XSD Relationships for Submissions.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/XSD%20Relationships%20for%20Submissions.png",
+      "retrieved": "2026-10-07",
+      "bytes": 17069,
+      "sha256": "4acc29d33f69596796ed8ce80e4f7d830a1021b235d301f15cd6620dd37409b3"
+    },
+    {
+      "path": "ERCOT-TERMS-OF-USE.txt",
+      "url": "https://www.ercot.com/help/terms",
+      "extract": "terms-text",
+      "retrieved": "2026-10-07",
+      "bytes": 5291,
+      "sha256": "b8a24e533ddb363e2bb10e80acca272990fd87489c9ce6caf46a96b84877393a"
+    }
+  ]
+}

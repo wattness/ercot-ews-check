@@ -1,0 +1,47 @@
+id: D033
+slug: cop-limits-nonnegative
+title: COP table requires hsl and lsl >= 0; the Protocols allow an ESR's HSL and LSL below zero
+kind: value-bound
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / Current Operating Plan (COP)
+  location: Message Element table
+  quote: Limits/hsl Y float High sustained limit in MW >=0 Limits/lsl Y float Low sustained limit in MW
+    >=0
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Current%20Operating%20Plan%20%28COP%29/
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 1247
+  rule: hsl and lsl are MWSingleDecimal, a plain xs:decimal; negative values validate.
+protocols_say:
+  section: Nodal Protocols 3.9.1(5)(c)(ii); 2.1, definition of Low Sustained Limit (LSL) for an Energy
+    Storage Resource (ESR). Version of 1 August 2026.
+  quote: For ESRs, the HSL may be negative ... [the LSL for an ESR is] expressed as a MW value that may
+    be less than, equal to, or greater than zero
+  url: https://www.ercot.com/mktrules/nprotocols/current
+do: For an Energy Storage Resource, send the HSL and LSL the Protocols define, negative where the resource
+  charges. The checker reports a negative COP hsl or lsl as a warning.
+lookup:
+  products:
+  - COP
+  messages:
+  - BidSet
+  elements:
+  - Limits
+  - hsl
+  - lsl
+  values:
+  - ESR
+  endpoints:
+  - Market Transaction Service
+probes:
+  portal:
+    page: Current%20Operating%20Plan%20%28COP%29
+    text: Limits/lsl Y float Low sustained limit in MW >=0
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:simpleType name="MWSingleDecimal" final="">
+notes: The cited Protocols text covers HSL and LSL only; the table's >=0 on hel and lel is still enforced.
+  The same table carries the ESR state-of-charge fields (maxSOC, minSOC, targetBeginSOC), and its lel row
+  repeats the lsl description, 'Low sustained limit in MW'.

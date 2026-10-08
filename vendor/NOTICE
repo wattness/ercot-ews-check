@@ -1,0 +1,87 @@
+Third-party files in this directory
+===================================
+
+Every file under vendor/ercot/ is byte-identical to its source.
+vendor/MANIFEST.json records each file's source URL (or ercot/api-specs commit),
+retrieval date, size and sha256; `python scripts/fetch_vendor.py verify` checks
+them. Two files outside vendor/ercot/ are text taken from web pages, not copies
+of a published file:
+
+  ERCOT-TERMS-OF-USE.txt   the text of https://www.ercot.com/help/terms,
+                           extracted from the page's HTML by
+                           scripts/fetch_vendor.py: markup removed, wording
+                           unchanged. Its hash is in MANIFEST.json.
+  licenses/W3C-SOFTWARE-NOTICE-19980720.txt
+                           the text of
+                           https://www.w3.org/Consortium/Legal/copyright-software-19980720
+
+
+ERCOT
+-----
+
+Files:
+  ercot/api-specs/ews/        the ews/ folder of https://github.com/ercot/api-specs
+                              at the commit pinned in MANIFEST.json
+  ercot/developer.ercot.com/  the developer portal's search index and two
+                              diagrams from https://developer.ercot.com/
+  ERCOT-TERMS-OF-USE.txt      ERCOT's Website User Agreement
+
+The ercot/api-specs repository carries no licence file. These files are
+redistributed under section 5 of ERCOT's Website User Agreement
+(https://www.ercot.com/help/terms, "Last updated: 07/20/2023"), which reads in
+part:
+
+  "The publicly available contents of this website may be used, reproduced,
+  and redistributed, provided that the contents are not modified and that you
+  maintain all copyright and other notices contained in the contents,
+  including this Agreement."
+
+Section 1 defines "this website" as ERCOT.com, "including any other sites that
+may be accessed through ERCOT.com". Both sources are reached that way:
+https://www.ercot.com/services/mdt links to https://developer.ercot.com, and the
+portal's EWS specification page (https://developer.ercot.com/api_specifications/ews/ews/)
+says "ERCOT Web Services' specifications are hosted on GitHub. Please navigate
+to our API Specification Repository to find the latest content."
+
+The files are therefore kept unmodified, their notices are kept, and the
+Agreement is reproduced in ERCOT-TERMS-OF-USE.txt.
+
+Section 9 of the Agreement reads:
+
+  "The ERCOT logo, "ERCOT," and "The Texas Connection" are either trademarks
+  or registered trademarks of ERCOT and may not be used without the prior
+  written permission of ERCOT."
+
+This project uses the name ERCOT only to say which market's interfaces it works
+with, and uses no ERCOT logo; see ../NOTICE.
+
+ERCOT provides this content "AS IS" without warranties of any kind (section 2
+of the Agreement).
+
+
+OASIS
+-----
+
+Files:
+  ercot/api-specs/ews/xsds/WSS200401wssecurity-secext-10.xsd
+  ercot/api-specs/ews/xsds/WSS200401wssecurity-utility-10.xsd
+  ercot/api-specs/ews/xsds/Notification.xsd  (ERCOT's revision of OASIS
+                                              WS-Notification)
+
+Copyright (c) OASIS Open 2002-2004 (Notification.xsd: 2004-2006). All Rights
+Reserved. Each file carries the OASIS copyright notice and permission
+paragraph, which are retained unchanged.
+
+
+W3C
+---
+
+File:
+  ercot/api-specs/ews/xsds/xmldsig-core-schema.xsd
+
+Copyright 2001 The Internet Society and W3C (Massachusetts Institute of
+Technology, Institut National de Recherche en Informatique et en Automatique,
+Keio University). All Rights Reserved. The file is governed by the W3C Software
+License (http://www.w3.org/Consortium/Legal/copyright-software-19980720), whose
+full text is in licenses/W3C-SOFTWARE-NOTICE-19980720.txt. The file's own notice
+is retained unchanged, and the file is not modified.

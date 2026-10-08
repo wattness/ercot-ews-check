@@ -1,0 +1,69 @@
+id: D027
+slug: getreports-table-case
+title: GetReports table names filename, Created, Size and Format; the schema declares fileName, created,
+  size and format
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Report Messages / GetReports
+  location: report list table
+  quote: filename String Report file name Created dateTime Date of report creation. Size Integer File
+    size in Bytes Format string
+  url: https://developer.ercot.com/applications/ews/Report%20Messages/GetReports/
+schema_says:
+  file: ErcotReportTypes.xsd
+  line: 30
+  rule: Report is a sequence of operatingDate, reportGroup, fileName, created, size, format and URL (typed
+    URL, an xs:anyURI restriction). The page's own XML example uses the schema's spelling.
+do: Read fileName, created, size and format.
+lookup:
+  messages:
+  - Reports
+  - GetReports
+  elements:
+  - fileName
+  - filename
+  - created
+  - Created
+  - size
+  - Size
+  - format
+  - Format
+  - URL
+  endpoints:
+  - Report Service
+reproducer:
+  invalid: |
+    <Reports xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <Report>
+        <operatingDate>2026-10-15</operatingDate>
+        <reportGroup>Example</reportGroup>
+        <filename>example.zip</filename>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <Size>1024</Size>
+        <Format>zip</Format>
+        <URL>https://example.invalid/report.zip</URL>
+      </Report>
+    </Reports>
+  valid: |
+    <Reports xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <Report>
+        <operatingDate>2026-10-15</operatingDate>
+        <reportGroup>Example</reportGroup>
+        <fileName>example.zip</fileName>
+        <created>2026-10-15T09:00:00-05:00</created>
+        <size>1024</size>
+        <format>zip</format>
+        <URL>https://example.invalid/report.zip</URL>
+      </Report>
+    </Reports>
+probes:
+  portal:
+    page: GetReports
+    text: filename String Report file name Created dateTime
+  schema:
+    file: ErcotReportTypes.xsd
+    pattern: <xs:element name="fileName"
+reported:
+- https://github.com/ercot/api-specs/issues/150

@@ -1,0 +1,82 @@
+id: D002
+slug: aso-table-pricecurve-container
+title: ASO table puts startTime and endTime under PriceCurve; ASOffer's curve element is ASPriceCurve
+kind: element-path
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / Ancillary Service Offer (ASO)
+  location: Message Element table
+  quote: PriceCurve/startTime Y dateTime Start time for curve Valid hour boundary PriceCurve/endTime Y
+    dateTime
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Ancillary%20Service%20Offer%20%28ASO%29/
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 360
+  rule: ASOffer declares ASPriceCurve. PriceCurve is a different element, used by EnergyBid and RTMEnergyBid;
+    the same table's other rows already say ASPriceCurve.
+do: Put startTime and endTime inside ASPriceCurve.
+lookup:
+  products:
+  - ASOffer
+  messages:
+  - BidSet
+  elements:
+  - ASPriceCurve
+  - PriceCurve
+  - startTime
+  - endTime
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <expirationTime>2026-10-14T10:00:00-05:00</expirationTime>
+        <resource>RESOURCE1</resource>
+        <asType>Off-Non-Spin</asType>
+        <PriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <OffLineNonSpin>
+            <xvalue>10.0</xvalue>
+            <OFFNS>6.50</OFFNS>
+            <block>VARIABLE</block>
+          </OffLineNonSpin>
+          <multiHourBlock>false</multiHourBlock>
+        </PriceCurve>
+      </ASOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <expirationTime>2026-10-14T10:00:00-05:00</expirationTime>
+        <resource>RESOURCE1</resource>
+        <asType>Off-Non-Spin</asType>
+        <ASPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <OffLineNonSpin>
+            <xvalue>10.0</xvalue>
+            <OFFNS>6.50</OFFNS>
+            <block>VARIABLE</block>
+          </OffLineNonSpin>
+          <multiHourBlock>false</multiHourBlock>
+        </ASPriceCurve>
+      </ASOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Ancillary%20Service%20Offer%20%28ASO%29
+    text: PriceCurve/startTime Y dateTime Start time for curve
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:element name="ASPriceCurve"
+reported:
+- https://github.com/ercot/api-specs/issues/150

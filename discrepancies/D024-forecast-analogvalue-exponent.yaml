@@ -1,0 +1,52 @@
+id: D024
+slug: forecast-analogvalue-exponent
+title: Forecast samples write AnalogValue in exponent form (1.6E0); the schema types it xs:decimal
+kind: value-format
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'Market Information Messages: Short-Term Wind Power Forecast, Short-Term Photovoltaic Power Forecast,
+    WGR and PVGR Production Potential'
+  location: XML examples
+  quote: <ns1:AnalogValue statistic="MEAN" timeStamp="2016-01-14T10:00:00-06:00" type="STWPF" units="MW">1.6E0</ns1:AnalogValue>
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Short-Term%20Wind%20Power%20Forecast/
+schema_says:
+  file: ErcotForecast.xsd
+  line: 78
+  rule: AnalogValue extends xs:decimal, whose lexical form has no exponent. 1.6E0 is an xs:float or xs:double
+    literal.
+do: When reading forecasts, parse the value as a float and do not reject the message on schema grounds
+  alone. When writing, use plain decimals.
+lookup:
+  messages:
+  - ForecastPayload
+  - ForecastSolarPayload
+  elements:
+  - AnalogValue
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <ForecastPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site duns="0000000000000" name="WIND_A" qseid="QSE1">SITE_A</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue statistic="MEAN" timeStamp="2026-10-15T10:00:00-05:00" type="STWPF" units="MW">1.6E0</AnalogValue>
+      </ForecastSet>
+    </ForecastPayload>
+  valid: |
+    <ForecastPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site duns="0000000000000" name="WIND_A" qseid="QSE1">SITE_A</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue statistic="MEAN" timeStamp="2026-10-15T10:00:00-05:00" type="STWPF" units="MW">1.6</AnalogValue>
+      </ForecastSet>
+    </ForecastPayload>
+probes:
+  portal:
+    page: Short-Term%20Wind%20Power%20Forecast
+    text: type="STWPF" units="MW">1.6E0</ns1:AnalogValue>
+  schema:
+    file: ErcotForecast.xsd
+    pattern: <xs:extension base="xs:decimal">
+notes: 'Found by validating the portal''s samples (`ercot-ews-check examples --invalid`): four pages.'

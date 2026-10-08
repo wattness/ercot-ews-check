@@ -1,0 +1,42 @@
+id: D010
+slug: incdecoffer-still-documented
+title: IncDecOffer is still documented as a bid type; RTC+B removed it from BidSet
+kind: withdrawn
+resolution: prose-stale
+status: open
+ercot_says:
+  page: Market Information Messages / DAM Phase II Validation Results
+  location: list of bid types
+  quote: IncDecOffer Inc Dec Energy Offer
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/DAM%20Phase%20II%20Validation%20Results/
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 77
+  rule: 'BidSet''s IncDecOffer element is commented out behind "RTC+B: Removed". ERCOT''s Document Revisions
+    record "Remove Incremental and Decremental Energy Offer Curves (IDO)".'
+do: Do not submit IncDecOffer. Treat the IDO page and the Appendix E IDO example as historical.
+lookup:
+  products:
+  - IncDecOffer
+  messages:
+  - BidSet
+  elements:
+  - IncDecOffer
+  values:
+  - IDO
+  endpoints:
+  - Market Transaction Service
+  - Market Information Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <IncDecOffer/>
+    </BidSet>
+probes:
+  portal:
+    page: DAM%20Phase%20II%20Validation%20Results
+    text: IncDecOffer Inc Dec Energy Offer
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: '<!--\s*RTC\+B: Removed\s*-->'

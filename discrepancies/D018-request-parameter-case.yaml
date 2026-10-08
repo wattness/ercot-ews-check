@@ -1,0 +1,74 @@
+id: D018
+slug: request-parameter-case
+title: Some Market Information pages write Request/startTime, endTime and option in lower case
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'Market Information Messages: Total ERCOT Load, Short-Term Wind Power Forecast, Short-Term Photovoltaic
+    Power Forecast, WGR and PVGR Production Potential, Market Totals, Total DAM Energy'
+  location: request parameter tables
+  quote: Request/startTime Start time Request/endTime End time
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Total%20ERCOT%20Load%20-%20Same%20as%20System%20Load/
+schema_says:
+  file: Message.xsd
+  line: 36
+  rule: 'RequestType declares StartTime, EndTime and Option with a capital initial, followed by a ##other
+    wildcard that does not admit message-namespace elements.'
+do: Write StartTime, EndTime and Option.
+lookup:
+  messages:
+  - RequestMessage
+  elements:
+  - StartTime
+  - EndTime
+  - Option
+  - startTime
+  - endTime
+  - option
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>TotalLoad</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+      <Request>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+      </Request>
+    </RequestMessage>
+  valid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>TotalLoad</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+      <Request>
+        <StartTime>2026-10-15T00:00:00-05:00</StartTime>
+        <EndTime>2026-10-16T00:00:00-05:00</EndTime>
+      </Request>
+    </RequestMessage>
+probes:
+  portal:
+    page: Total%20ERCOT%20Load
+    text: Request/startTime Start time Request/endTime End time
+  schema:
+    file: Message.xsd
+    pattern: <xsd:element name="EndTime" type="xsd:dateTime"
+reported:
+- https://github.com/ercot/api-specs/issues/150

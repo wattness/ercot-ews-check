@@ -1,0 +1,60 @@
+id: D025
+slug: sced-mcpc-samples-predate-capped-split
+title: SCED-interval MCPC samples use MCPC and MCPCOriginal; the schema now has Capped and Uncapped variants
+kind: element-name
+resolution: prose-stale
+status: open
+ercot_says:
+  page: 'Market Information Messages: RT Clearing Prices for Capacity by SCED Interval; Price Corrected
+    RTM MCPCs by SCED Interval'
+  location: XML examples
+  quote: <ns1:SCEDMCPC> <ns1:SCEDTimestamp>10/01/2025 11:10:25</ns1:SCEDTimestamp> <ns1:RepeatedHourFlag>N</ns1:RepeatedHourFlag>
+    <ns1:ASType>ECRS</ns1:ASType> <ns1:MCPC>
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/RT%20Clearing%20Prices%20for%20Capacity%20by%20SCED%20Interval/
+schema_says:
+  file: ErcotInformationTypes.xsd
+  line: 446
+  rule: Version 0.3.34 (NPRR1290/NPRR1323) replaced SCEDMCPC/MCPC with CappedMCPC and UncappedMCPC, and
+    RTMPriceCorrectionMCPCSCED's MCPCOriginal/MCPCCorrected with capped and uncapped pairs.
+do: Read CappedMCPC and UncappedMCPC (and their Original/Corrected pairs). The 15-minute and SPP variants
+  keep MCPC.
+lookup:
+  messages:
+  - SCEDMCPCS
+  - RTMPriceCorrectionMCPCSCEDs
+  elements:
+  - MCPC
+  - CappedMCPC
+  - UncappedMCPC
+  - MCPCOriginal
+  - CappedMCPCOriginal
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <SCEDMCPCS xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <SCEDMCPC>
+        <SCEDTimestamp>10/01/2026 11:10:25</SCEDTimestamp>
+        <RepeatedHourFlag>N</RepeatedHourFlag>
+        <ASType>ECRS</ASType>
+        <MCPC>14.50</MCPC>
+      </SCEDMCPC>
+    </SCEDMCPCS>
+  valid: |
+    <SCEDMCPCS xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <SCEDMCPC>
+        <SCEDTimestamp>10/01/2026 11:10:25</SCEDTimestamp>
+        <RepeatedHourFlag>N</RepeatedHourFlag>
+        <ASType>ECRS</ASType>
+        <CappedMCPC>14.50</CappedMCPC>
+        <UncappedMCPC>14.50</UncappedMCPC>
+      </SCEDMCPC>
+    </SCEDMCPCS>
+probes:
+  portal:
+    page: RT%20Clearing%20Prices%20for%20Capacity%20by%20SCED%20Interval
+    text: <ns1:ASType>ECRS</ns1:ASType> <ns1:MCPC>
+  schema:
+    file: ErcotInformationTypes.xsd
+    pattern: <xs:element name="CappedMCPCOriginal" type="xs:decimal"/>
+notes: Found by validating the portal's samples (`ercot-ews-check examples --invalid`).

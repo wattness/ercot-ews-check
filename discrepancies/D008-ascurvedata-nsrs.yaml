@@ -1,0 +1,77 @@
+id: D008
+slug: ascurvedata-nsrs
+title: Services Organization says AS price curves use ASCurveData with NSRS values; neither name exists
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Services Organization
+  location: Use of the IEC CIM
+  quote: For PriceCurve for ancillary services, ASCurveData elements are used (instead of CurveData elements)
+    to define points for REGUP, REGDN, RRS and NSRS values.
+  url: https://developer.ercot.com/applications/ews/Services%20Organization/#use-of-the-iec-cim
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 689
+  rule: No ERCOT schema declares ASCurveData. ASOnlyPriceCurve uses CurveData. NSRS is not an AS type
+    in any schema, and the list omits ECRS.
+do: Use CurveData inside ASOnlyPriceCurve, and ERCOT's ASType values (for example Reg-Up, Reg-Down, RRSPF,
+  ECRSS, Non-Spin).
+lookup:
+  products:
+  - ASOnlyOffer
+  messages:
+  - BidSet
+  elements:
+  - ASCurveData
+  - CurveData
+  - ASOnlyPriceCurve
+  values:
+  - NSRS
+  - ECRS
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Up</asType>
+        <bidID>regup01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <ASCurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>15.50</y1value>
+          </ASCurveData>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Up</asType>
+        <bidID>regup01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>15.50</y1value>
+          </CurveData>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Services%20Organization
+    text: ASCurveData elements are used (instead of CurveData elements)
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:complexType name="ASOnlyPriceCurve">

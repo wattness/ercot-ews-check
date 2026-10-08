@@ -1,0 +1,47 @@
+id: D021
+slug: acknowledge-timestamp-case
+title: The Acknowledge table names TimeStamp; Notification.xsd declares Timestamp
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Notifications
+  location: Interfaces Required, Acknowledge message
+  quote: ReplyCode OK or ERROR TimeStamp Current time string
+  url: https://developer.ercot.com/applications/ews/Notifications/#interfaces-required
+schema_says:
+  file: Notification.xsd
+  line: 46
+  rule: 'Acknowledge is a sequence of ReplyCode (string) and Timestamp (xsd:dateTime), then a ##other
+    wildcard; <TimeStamp> in the notification namespace matches neither.'
+do: Reply with <Timestamp> carrying an xsd:dateTime.
+lookup:
+  messages:
+  - Acknowledge
+  - Notify
+  elements:
+  - Timestamp
+  - TimeStamp
+  - ReplyCode
+  endpoints:
+  - Notifications
+reproducer:
+  invalid: |
+    <Acknowledge xmlns="http://www.ercot.com/schema/2007-06/nodal/notification">
+      <ReplyCode>OK</ReplyCode>
+      <TimeStamp>2026-10-15T09:00:05-05:00</TimeStamp>
+    </Acknowledge>
+  valid: |
+    <Acknowledge xmlns="http://www.ercot.com/schema/2007-06/nodal/notification">
+      <ReplyCode>OK</ReplyCode>
+      <Timestamp>2026-10-15T09:00:05-05:00</Timestamp>
+    </Acknowledge>
+probes:
+  portal:
+    page: applications/ews/Notifications/
+    text: ReplyCode OK or ERROR TimeStamp Current time string
+  schema:
+    file: Notification.xsd
+    pattern: <xsd:element name="Timestamp" type="xsd:dateTime"
+reported:
+- https://github.com/ercot/api-specs/issues/150

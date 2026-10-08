@@ -1,0 +1,54 @@
+id: D020
+slug: outage-plannedsart-typo
+title: Outage Creation and Outage Update tables spell Schedule/plannedSart
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Outage Scheduling Messages / Outage Creation; Outage Update
+  location: Message Element tables
+  quote: Schedule/ plannedSart N dateTime This is the date/time at which the Outage is planned to start.
+  url: https://developer.ercot.com/applications/ews/Outage%20Scheduling%20Messages/Outage%20Creation/
+schema_says:
+  file: ErcotOutageTypes.xsd
+  line: 182
+  rule: The schema declares plannedStart (also new_plannedStart, plannedStartFrom, plannedStartTo). plannedSart
+    appears in no schema.
+do: Write plannedStart.
+lookup:
+  messages:
+  - OutageSet
+  elements:
+  - plannedStart
+  - plannedSart
+  - Schedule
+  endpoints:
+  - Outage Scheduling Service
+reproducer:
+  invalid: |
+    <OutageSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <Outage>
+        <Schedule>
+          <plannedSart>2026-11-03T08:00:00-06:00</plannedSart>
+          <plannedEnd>2026-11-03T17:00:00-06:00</plannedEnd>
+        </Schedule>
+      </Outage>
+    </OutageSet>
+  valid: |
+    <OutageSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <Outage>
+        <Schedule>
+          <plannedStart>2026-11-03T08:00:00-06:00</plannedStart>
+          <plannedEnd>2026-11-03T17:00:00-06:00</plannedEnd>
+        </Schedule>
+      </Outage>
+    </OutageSet>
+probes:
+  portal:
+    page: Outage%20Creation
+    text: Schedule/ plannedSart N dateTime
+  schema:
+    file: ErcotOutageTypes.xsd
+    pattern: <xs:element name="plannedStart" type="xs:dateTime"
+reported:
+- https://github.com/ercot/api-specs/issues/150

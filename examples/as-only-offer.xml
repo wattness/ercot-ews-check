@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+  <tradingDate>2026-10-15</tradingDate>
+  <ASOnlyOffer>
+    <startTime>2026-10-15T05:00:00+00:00</startTime>
+    <endTime>2026-10-16T05:00:00+00:00</endTime>
+    <asType>Reg-Up</asType>
+    <bidID>regup01</bidID>
+    <ASOnlyPriceCurve>
+      <startTime>2026-10-15T11:00:00+00:00</startTime>
+      <endTime>2026-10-15T12:00:00+00:00</endTime>
+      <CurveData>
+        <xvalue>10.0</xvalue>
+        <y1value>15.50</y1value>
+      </CurveData>
+    </ASOnlyPriceCurve>
+    <ASOnlyPriceCurve>
+      <startTime>2026-10-15T12:00:00+00:00</startTime>
+      <endTime>2026-10-15T13:00:00+00:00</endTime>
+      <CurveData>
+        <xvalue>10.0</xvalue>
+        <y1value>15.50</y1value>
+      </CurveData>
+    </ASOnlyPriceCurve>
+    <ASOnlyPriceCurve>
+      <startTime>2026-10-15T23:00:00+00:00</startTime>
+      <endTime>2026-10-16T00:00:00+00:00</endTime>
+      <CurveData>
+        <xvalue>10.0</xvalue>
+        <y1value>15.50</y1value>
+      </CurveData>
+    </ASOnlyPriceCurve>
+  </ASOnlyOffer>
+</BidSet>

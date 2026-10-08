@@ -1,0 +1,35 @@
+id: D028
+slug: appendix-c-dispute-schema-names
+title: Appendix C's diagram names ErcotDispute.xsd and ErcotDisputeTypes.xsd; the files are ErcotDisputes.xsd
+  and ErcotDisputesTypes.xsd
+kind: file-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'Appendices / Appendix C: XSD Relationships for Submissions'
+  location: diagram (XSD Relationships for Submissions.png)
+  quote: ErcotDispute.xsd, ErcotDisputeTypes.xsd
+  url: https://developer.ercot.com/applications/ews/Appendices/Appendix%20C_%20XSD%20Relationships%20for%20Submissions/
+schema_says:
+  file: ErcotDisputes.xsd
+  line: 12
+  rule: The published files are ErcotDisputes.xsd and ErcotDisputesTypes.xsd; ErcotDisputes.xsd includes
+    schemaLocation="ErcotDisputesTypes.xsd".
+do: Use the plural file names.
+lookup:
+  messages:
+  - Dispute
+  values:
+  - ErcotDispute.xsd
+  - ErcotDisputeTypes.xsd
+  - ErcotDisputes.xsd
+  - ErcotDisputesTypes.xsd
+  endpoints:
+  - Dispute Service
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/XSD Relationships for Submissions.png
+    sha256: 4acc29d33f69596796ed8ce80e4f7d830a1021b235d301f15cd6620dd37409b3
+  schema:
+    file: ErcotDisputes.xsd
+    pattern: <xs:include schemaLocation="ErcotDisputesTypes\.xsd"/>

@@ -1,0 +1,62 @@
+id: D014
+slug: appendix-d-replaydetection
+title: Appendix D's ReplayDetection has Created before Nonce, in the wsu and wsse namespaces
+kind: element-order
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'Appendices / Appendix D: Annotated SOAP Message'
+  location: annotated envelope, section 8
+  quote: <msg:ReplayDetection> <wsu:Created> 2006-11-29T20:05:55.022Z </wsu:Created> <wsse:Nonce EncodingType="#Base64Binary">
+  url: https://developer.ercot.com/applications/ews/Appendices/Appendix%20D_%20Annotated%20SOAP%20Message/
+schema_says:
+  file: Message.xsd
+  line: 64
+  rule: ReplayDetectionType is a sequence of Nonce then Created, both declared locally in the message
+    namespace (elementFormDefault qualified).
+do: Write msg:Nonce, then msg:Created, both in the message namespace. Appendix E, Appendix H and the service
+  pages already do.
+lookup:
+  messages:
+  - RequestMessage
+  elements:
+  - ReplayDetection
+  - Nonce
+  - Created
+  endpoints:
+  - Market Transaction Service
+  - Market Information Service
+reproducer:
+  invalid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <wsu:Created xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2026-10-14T09:00:00Z</wsu:Created>
+          <wsse:Nonce xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</wsse:Nonce>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+  valid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+probes:
+  portal:
+    page: Appendix%20D_%20Annotated%20SOAP%20Message
+    text: <wsu:Created> 2006-11-29T20:05:55.022Z </wsu:Created> <wsse:Nonce EncodingType="#Base64Binary">
+  schema:
+    file: Message.xsd
+    pattern: name="ReplayDetectionType">\s*<xsd:sequence>\s*<xsd:element name="Nonce"

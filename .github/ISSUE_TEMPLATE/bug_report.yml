@@ -1,0 +1,30 @@
+name: Checker bug
+description: A false positive, a missed error, or a crash
+labels: [bug]
+body:
+  - type: textarea
+    id: document
+    attributes:
+      label: Document
+      description: The smallest XML that shows the problem (remove anything confidential)
+      render: xml
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output of `ercot-ews-check check --json`
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected, and the ERCOT source for it
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `ercot-ews-check --version`

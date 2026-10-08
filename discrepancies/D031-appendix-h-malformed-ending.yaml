@@ -1,0 +1,66 @@
+id: D031
+slug: appendix-h-malformed-ending
+title: Appendix H's spring-forward example has TmPoint/ending 2011-03-13T01400:00-05:00
+kind: value-format
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'Appendices / Appendix H: DST XML Examples'
+  location: ASObligations example, spring-forward day
+  quote: <ns1:ending>2011-03-13T01400:00-05:00</ns1:ending>
+  url: https://developer.ercot.com/applications/ews/Appendices/Appendix%20H_%20DST%20XML%20Examples/
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 899
+  rule: TmPoint/ending is xs:dateTime; '01400' is not an hour.
+do: On the spring-forward day, the hour after 01:00-02:00 CST starts at 03:00 CDT; write ending as a valid
+  dateTime such as 2011-03-13T04:00:00-05:00.
+lookup:
+  messages:
+  - ASObligations
+  elements:
+  - TmPoint
+  - ending
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <SelfArrangedAS>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Down</asType>
+        <CapacitySchedule>
+          <TmPoint>
+            <time>2026-10-15T03:00:00-05:00</time>
+            <ending>2026-03-08T01400:00-05:00</ending>
+            <value1>4.0</value1>
+          </TmPoint>
+        </CapacitySchedule>
+      </SelfArrangedAS>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <SelfArrangedAS>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Reg-Down</asType>
+        <CapacitySchedule>
+          <TmPoint>
+            <time>2026-10-15T03:00:00-05:00</time>
+            <ending>2026-10-15T04:00:00-05:00</ending>
+            <value1>4.0</value1>
+          </TmPoint>
+        </CapacitySchedule>
+      </SelfArrangedAS>
+    </BidSet>
+probes:
+  portal:
+    page: Appendix%20H_%20DST%20XML%20Examples
+    text: <ns1:ending>2011-03-13T01400:00-05:00</ns1:ending>
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:complexType name="TmPoint">
+notes: Found by validating the portal's samples (`ercot-ews-check examples --invalid`).

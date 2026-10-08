@@ -1,0 +1,86 @@
+id: D005
+slug: offer-expirationtime-required
+title: expirationTime is drawn as the one required field of ASOffer; the schema makes it optional
+kind: required-field
+resolution: prose-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / Ancillary Service Offer (ASO)
+  location: structure diagram (ASOffer_Structure.png)
+  observed: expirationTime is the only solid (required) box; every sibling is dashed (optional).
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Ancillary%20Service%20Offer%20%28ASO%29/
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 276
+  rule: expirationTime is minOccurs="0" on Offer and EnergyBid, like every other payload field.
+do: Always send expirationTime on ASOffer, EnergyOnlyOffer and EnergyBid. The EOO and EB tables also mark
+  it Y.
+lookup:
+  products:
+  - ASOffer
+  - EnergyOnlyOffer
+  - EnergyBid
+  messages:
+  - BidSet
+  elements:
+  - expirationTime
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <EnergyOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <sp>HB_HOUSTON</sp>
+        <bidID>eoo01</bidID>
+        <EnergyOfferCurve>
+          <startTime>2026-10-15T17:00:00-05:00</startTime>
+          <endTime>2026-10-15T18:00:00-05:00</endTime>
+          <curveStyle>CURVE</curveStyle>
+          <CurveData>
+            <xvalue>5.0</xvalue>
+            <y1value>20.00</y1value>
+          </CurveData>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>35.50</y1value>
+          </CurveData>
+        </EnergyOfferCurve>
+      </EnergyOnlyOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <EnergyOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <expirationTime>2026-10-14T09:00:00-05:00</expirationTime>
+        <sp>HB_HOUSTON</sp>
+        <bidID>eoo01</bidID>
+        <EnergyOfferCurve>
+          <startTime>2026-10-15T17:00:00-05:00</startTime>
+          <endTime>2026-10-15T18:00:00-05:00</endTime>
+          <curveStyle>CURVE</curveStyle>
+          <CurveData>
+            <xvalue>5.0</xvalue>
+            <y1value>20.00</y1value>
+          </CurveData>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>35.50</y1value>
+          </CurveData>
+        </EnergyOfferCurve>
+      </EnergyOnlyOffer>
+    </BidSet>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/ASOffer_Structure.png
+    sha256: 498ed5ee2e6158b73811781a420210dc22c3d04c665d96199b56fe5b65f1aa81
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:element name="expirationTime" type="xs:dateTime" minOccurs="0"/>
+notes: 'ERCOT''s diagrams use solid boxes for required elements: on the Message Header diagram the solid
+  boxes are exactly the five fields Message.xsd requires. See D007 for why the payload schemas cannot
+  express a requirement.'

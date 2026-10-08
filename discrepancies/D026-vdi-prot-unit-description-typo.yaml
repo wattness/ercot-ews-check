@@ -1,0 +1,28 @@
+id: D026
+slug: vdi-prot-unit-description-typo
+title: VDI InstructionType PROT_UNIT is described as 'PROTECT UNIT AGAIN FREEZING CONDITIONSE'
+kind: typo
+resolution: neither
+status: open
+ercot_says:
+  page: Verbal Dispatch Instructions
+  location: InstructionType values
+  quote: PROT_UNIT PROTECT UNIT AGAIN FREEZING CONDITIONSE
+  url: https://developer.ercot.com/applications/ews/Verbal%20Dispatch%20Instructions/
+schema_says:
+  rule: InstructionType is not enumerated in any schema.
+do: Match on the code PROT_UNIT, not on the description. Text search for 'against freezing conditions'
+  will miss this row.
+lookup:
+  messages:
+  - VDIs
+  elements:
+  - InstructionType
+  values:
+  - PROT_UNIT
+  endpoints:
+  - Verbal Dispatch Instructions
+probes:
+  portal:
+    page: Verbal%20Dispatch%20Instructions
+    text: PROTECT UNIT AGAIN FREEZING CONDITIONSE

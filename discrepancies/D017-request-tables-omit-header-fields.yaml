@@ -1,0 +1,55 @@
+id: D017
+slug: request-tables-omit-header-fields
+title: Per-interface request tables omit ReplayDetection and Revision, which the header requires
+kind: required-field
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Every interface page (for example Get SASM ID List)
+  location: request parameter tables
+  quote: 'The following table describes the request parameters: Message Element Value Header/Verb ...
+    Header/Noun ... Header/Source ... Header/UserID'
+  url: https://developer.ercot.com/applications/ews/Services%20Organization/#message-header
+schema_says:
+  file: Message.xsd
+  line: 94
+  rule: HeaderType requires Verb, Noun, ReplayDetection, Revision and Source, in that order.
+do: Build the header from Services Organization's Message Header section, not from an interface's request
+  table.
+lookup:
+  messages:
+  - RequestMessage
+  elements:
+  - ReplayDetection
+  - Revision
+  - Header
+reproducer:
+  invalid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <Source>QSE1</Source>
+        <UserID>USER1</UserID>
+      </Header>
+    </RequestMessage>
+  valid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+probes:
+  portal:
+    page: Services%20Organization
+    text: 'Nonce: A unique number that would not be repeated'
+  schema:
+    file: Message.xsd
+    pattern: name="ReplayDetection"
