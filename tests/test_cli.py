@@ -7,7 +7,7 @@ import pytest
 
 from ercot_ews_check.cli import main
 
-from helpers import ROOT
+from helpers import EWS, ROOT
 
 GOOD = str(ROOT / "examples" / "energy-only-offer.xml")
 BAD = str(ROOT / "examples" / "broken" / "as-only-offer.xml")
@@ -61,6 +61,15 @@ def test_explain(capsys):
     assert code == 1 and out.splitlines()[1].startswith("BLOCKED")
     assert "Possibly related catalogue entry D001" in out
     assert run(capsys, "explain", GOOD)[0] == 0
+
+
+def test_explain_does_not_present_this_tools_depth_limit_as_an_ercot_rule(capsys, tmp_path):
+    doc = tmp_path / "deep.xml"
+    nest = "<x>" * 100 + "</x>" * 100
+    doc.write_text(f'<BidSet xmlns="{EWS}">{nest}</BidSet>', encoding="utf-8")
+    code, out = run(capsys, "explain", str(doc))
+    assert code == 1 and "nested deeper than this tool reads" in out
+    assert "ERCOT states" not in out
 
 
 def test_unreadable_file_is_not_a_verdict(capsys, tmp_path):

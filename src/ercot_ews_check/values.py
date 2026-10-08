@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from decimal import ROUND_DOWN, Decimal, InvalidOperation
+from decimal import ROUND_DOWN, Decimal
 
 # ErcotPrice: at most six integer digits and two decimals.
 PRICE = re.compile(r"\A[+\-]?(\d{1,6}|\d{1,6}\.\d{0,2}|\.\d{1,2})\Z")
@@ -53,7 +53,7 @@ def decimals(text: str) -> int:
     if "e" in t.lower():
         try:
             return max(0, -Decimal(t).normalize().as_tuple().exponent)
-        except InvalidOperation:
+        except ArithmeticError:  # InvalidOperation, or Overflow past decimal's exponent range
             return 0
     return len(t.split(".", 1)[1]) if "." in t else 0
 

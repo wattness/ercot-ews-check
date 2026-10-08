@@ -52,6 +52,11 @@ SRC_CONVENTIONS = f"{PORTAL}/Services%20Organization/#other-conventions"
 SRC_LIMITS = f"{PORTAL}/Services%20Organization/#web-service-design-assumptions-and-limitations"
 SRC_CANCEL = f"{PORTAL}/Market%20Transaction%20Service/#canceling-bids-offers-trades-and-schedules"
 SRC_REVISIONS = f"{PORTAL}/Document%20Revisions/"
+# ERCOT lists SOAP's syntax rules in its MarkeTrak Developer Guide; the EWS pages do not.
+SRC_SOAP = (
+    "https://developer.ercot.com/applications/marketrak/MarkeTrak_API_Dev_v1_2/"
+    "#71-basic-syntax-rules-of-soap"
+)
 
 
 @dataclass(frozen=True)
@@ -77,7 +82,7 @@ class Report:
 
     @property
     def blocked(self) -> bool:
-        """True when a finding breaks a stated rule or ERCOT may change the document silently."""
+        """True when any finding is an error or a silent change."""
         return any(f.severity in BLOCKING for f in self.findings)
 
     def by_rule(self) -> set[str]:
@@ -127,6 +132,12 @@ def _see_required(paths) -> tuple[str, ...]:
     )
 
 
+def _values_text(rule: constraints.Constraint) -> str:
+    """ERCOT's Values cell for a table row; the search index runs the Description cell into it."""
+    stated = constraints._STATED.search(rule.source)
+    return rule.source[stated.start() :] if stated else rule.source
+
+
 def _texts(root: ET.Element, name: str) -> list[ET.Element]:
     return [el for el in root.iter() if local(el.tag) == name and (el.text or "").strip()]
 
@@ -143,6 +154,16 @@ def _schema_findings(rep: Report, verdict: schema.Verdict) -> None:
     for err in verdict.errors:
         x = explain.explain(err)
         rep.findings.append(Finding("schema", ERROR, x.message, x.where, x.fix, x.see))
+    if verdict.unlisted:
+        rep.findings.append(
+            Finding(
+                "schema",
+                ERROR,
+                f"{verdict.unlisted:,} more schema error(s), not listed; a report lists the "
+                f"first {schema.MAX_ERRORS}.",
+                fix="Fix the errors listed and check again.",
+            )
+        )
 
 
 def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_message: bool) -> None:
@@ -215,7 +236,7 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
             why = rule.violation(value, trade_day)
             if not why:
                 continue
-            stated = f'ERCOT\'s table states: "{rule.source[:90]}"'
+            stated = f'ERCOT\'s table states: "{_values_text(rule)[:90]}"'
             if rule.kind == constraints.HOUR_BOUNDARY:
                 h = hazards.BY_ID["silent-hour-rounding"]
                 rep.findings.append(
@@ -280,7 +301,7 @@ def _trade_date(
     )
     if rule is not None and "trade date" in rule.source:
         severity, source = ERROR, page
-        message += f' The {tag} table states: "{rule.source[:90]}".'
+        message += f' The {tag} table states: "{_values_text(rule)[:90]}".'
     else:
         severity, source = WARNING, SRC_CONVENTIONS
         message += (
@@ -518,10 +539,22 @@ def check(xml: str | bytes, xsd_dir: Path | None = None, *, verb: str = "create"
     """
     rep = Report()
     verdict = schema.validate(xml, xsd_dir)
-    _schema_findings(rep, verdict)
     try:
-        root = schema.payload_root(ET.fromstring(xml))
+        root = schema.payload_root(schema.parse(xml))
+    except schema.DoctypeError as e:
+        rep.schema = verdict.state
+        fix = "Remove the DOCTYPE, and write out the text of any entity it declares."
+        rep.findings.append(Finding("doctype", ERROR, str(e), fix=fix, source=SRC_SOAP))
+        return rep
+    except schema.DepthError as e:
+        rep.schema = verdict.state
+        fix = "Remove the extra levels; no ERCOT schema nests elements this deep."
+        rep.findings.append(Finding("nesting-depth", ERROR, str(e), fix=fix))
+        return rep
     except ET.ParseError:
+        root = None
+    _schema_findings(rep, verdict)
+    if root is None:
         return rep
     if root.tag == q(MESSAGE, "RequestMessage"):
         _message(rep, root)

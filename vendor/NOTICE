@@ -65,12 +65,12 @@ OASIS
 Files:
   ercot/api-specs/ews/xsds/WSS200401wssecurity-secext-10.xsd
   ercot/api-specs/ews/xsds/WSS200401wssecurity-utility-10.xsd
-  ercot/api-specs/ews/xsds/Notification.xsd  (ERCOT's revision of OASIS
-                                              WS-Notification)
+  ercot/api-specs/ews/xsds/Notification.xsd    (ERCOT's revision of OASIS
+  ercot/api-specs/ews/wsdls/Notification.wsdl   WS-Notification)
 
-Copyright (c) OASIS Open 2002-2004 (Notification.xsd: 2004-2006). All Rights
-Reserved. Each file carries the OASIS copyright notice and permission
-paragraph, which are retained unchanged.
+Copyright (c) OASIS Open 2002-2004 (Notification.xsd and Notification.wsdl:
+2004-2006). All Rights Reserved. Each file carries the OASIS copyright notice
+and permission paragraph, which are retained unchanged.
 
 
 W3C

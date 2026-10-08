@@ -18,6 +18,12 @@ def test_missing_schemas_are_unverified_not_valid(tmp_path):
     assert v.state == schema.UNVERIFIED and not v.ok
 
 
+def test_a_document_that_cannot_be_parsed_is_invalid_without_the_schemas(tmp_path):
+    deep = "<x>" * (schema.MAX_DEPTH + 1) + "</x>" * (schema.MAX_DEPTH + 1)
+    for xml in ("<BidSet", "<!DOCTYPE x><x/>", deep):
+        assert schema.validate(xml, xsd_dir=tmp_path / "absent").state == schema.INVALID
+
+
 def test_soap_envelope_is_unwrapped():
     inner = EXAMPLES[0].read_text().split("?>", 1)[-1]
     envelope = (

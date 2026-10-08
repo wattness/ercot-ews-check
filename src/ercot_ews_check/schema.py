@@ -11,6 +11,15 @@ from ercot_ews_check import sources
 from ercot_ews_check.namespaces import MESSAGE, SOAP_ENV, q
 
 VALID, INVALID, UNVERIFIED = "valid", "invalid", "unverified"
+# ERCOT's schemas declare no element more than a few levels below a top-level element.
+# Validation recurses at every level, and a few hundred levels exhaust Python's stack.
+MAX_DEPTH = 100
+# Errors kept from one validation; the rest are counted. Explaining an error costs more
+# than finding it, and one stray element repeated can raise one error per copy.
+MAX_ERRORS = 100
+# Characters (or bytes) handed to expat at a time. A refusal stops the parse at the end
+# of the chunk that holds it, so expat never reads far past a DOCTYPE or a deep nest.
+CHUNK = 1 << 16
 
 
 @dataclass(frozen=True)
@@ -26,21 +35,75 @@ class SchemaError:
     value: str = ""
     kind: str = ""  # children | enumeration | pattern | length | bound | datatype | other
     model: tuple[str, ...] = ()
-    present: tuple[str, ...] = ()  # the parent's children, for children errors
+    present: tuple[str, ...] = ()  # the parent's child tags, each once, for children errors
 
 
 @dataclass(frozen=True)
 class Verdict:
-    """``valid``, ``invalid`` or ``unverified``. Unverified is never a pass."""
+    """``valid``, ``invalid`` or ``unverified``. Unverified is never a pass.
+
+    ``errors`` holds at most MAX_ERRORS errors; ``unlisted`` counts the rest.
+    """
 
     state: str
     schema: str = ""
     detail: str = ""
     errors: tuple[SchemaError, ...] = field(default_factory=tuple)
+    unlisted: int = 0
 
     @property
     def ok(self) -> bool:
         return self.state == VALID
+
+
+class DoctypeError(Exception):
+    """A document type declaration, refused when expat reports it; no DTD text reaches the tree."""
+
+
+class DepthError(Exception):
+    """Elements nested more than MAX_DEPTH levels deep."""
+
+
+class _TreeBuilder(ET.TreeBuilder):
+    depth = 0
+
+    def doctype(self, name, pubid, system):
+        raise DoctypeError(
+            "The document has a document type declaration (<!DOCTYPE ...>). A SOAP message "
+            "must not contain one, and this tool does not use DTDs or entities, so nothing "
+            "else was checked."
+        )
+
+    def start(self, tag, attrs):
+        self.depth += 1
+        if self.depth > MAX_DEPTH:
+            raise DepthError(
+                f"Elements nest more than {MAX_DEPTH} levels deep, far deeper than anything "
+                "ERCOT's schemas declare, so nothing else was checked."
+            )
+        return super().start(tag, attrs)
+
+    def end(self, tag):
+        self.depth -= 1
+        return super().end(tag)
+
+
+def parse(xml: str | bytes) -> ET.Element:
+    """Parse a document from an untrusted source.
+
+    No DTD or entity text reaches the tree, and nothing is fetched. A DOCTYPE raises
+    DoctypeError and nesting past MAX_DEPTH raises DepthError; either stops the parse at
+    the end of the CHUNK being fed, of which expat still reads the rest, within its own
+    entity-amplification limits. Anything else expat cannot read, including an encoding
+    it does not support, raises ET.ParseError.
+    """
+    parser = ET.XMLParser(target=_TreeBuilder())
+    try:
+        for start in range(0, len(xml), CHUNK):
+            parser.feed(xml[start : start + CHUNK])
+        return parser.close()
+    except (LookupError, ValueError) as e:  # an unusable encoding, or a str with a surrogate
+        raise ET.ParseError(str(e)) from e
 
 
 def _uri_mapper() -> dict[str, str]:
@@ -53,12 +116,19 @@ def _uri_mapper() -> dict[str, str]:
 
 @lru_cache(maxsize=4)
 def _index(xsd_dir: str) -> dict[str, tuple[str, object]]:
-    """Global element (Clark name) -> (schema file, loaded schema)."""
+    """Global element (Clark name) -> (schema file, loaded schema).
+
+    Schemas load from local files only and without xmlschema's fallback locations. By
+    default xmlschema maps some namespaces (XSLT among them) to schemas on www.w3.org and
+    fetches one when a document puts an element of that namespace in a wildcard.
+    """
     import xmlschema
 
     owner: dict[str, tuple[str, object]] = {}
     for path in sorted(Path(xsd_dir).glob("*.xsd")):
-        sch = xmlschema.XMLSchema(str(path), uri_mapper=_uri_mapper())
+        sch = xmlschema.XMLSchema(
+            str(path), uri_mapper=_uri_mapper(), allow="local", use_fallback=False
+        )
         for el in sch.elements.values():
             declared = Path(el.schema.url or path).name
             if el.name not in owner or declared == path.name:
@@ -75,7 +145,8 @@ def payload_root(root: ET.Element) -> ET.Element:
     return root
 
 
-def _structured(err) -> SchemaError:
+def _structured(err, child_tags: dict[int, tuple[str, ...]]) -> SchemaError:
+    """``child_tags`` caches each parent's child tags across the errors of one validation."""
     import xmlschema.validators as v
 
     reason = (err.reason or err.message or "").replace("\n", " ")
@@ -92,13 +163,18 @@ def _structured(err) -> SchemaError:
         model = ()
         if isinstance(validator, v.XsdGroup):
             model = tuple(e.name for e in validator.iter_elements() if getattr(e, "name", None))
+        present = ()
+        if elem is not None:
+            if id(elem) not in child_tags:
+                child_tags[id(elem)] = tuple(dict.fromkeys(c.tag for c in elem))
+            present = child_tags[id(elem)]
         return SchemaError(
             **common,
             kind="children",
             invalid_tag=err.invalid_tag or "",
             expected=expected,
             model=model,
-            present=tuple(c.tag for c in elem) if elem is not None else (),
+            present=present,
         )
     name = type(validator).__name__
     if name == "XsdEnumerationFacets":
@@ -119,8 +195,9 @@ def _structured(err) -> SchemaError:
 def documents(root: ET.Element) -> list[ET.Element]:
     """The root, plus each payload inside a RequestMessage or ResponseMessage.
 
-    Message.xsd declares Payload as ``xs:any processContents="skip"``, so validating
-    an envelope alone never checks the BidSet inside it.
+    Message.xsd lets a Payload hold any element of another namespace unchecked
+    (``xsd:any processContents="skip"``), so validating an envelope alone never checks
+    the BidSet inside it.
     """
     out = [root]
     payload = root.find(q(MESSAGE, "Payload"))
@@ -142,27 +219,44 @@ def type_names(sch, path: str) -> set[str]:
 
 
 def validate(xml: str | bytes, xsd_dir: Path | None = None) -> Verdict:
-    """Validate one EWS document; unwraps a SOAP envelope and checks message payloads too."""
+    """Validate one EWS document; unwraps a SOAP envelope and checks message payloads too.
+
+    A document that cannot be parsed is invalid whether or not the XSDs can be loaded.
+    """
+    try:
+        root = parse(xml)
+    except ET.ParseError as e:
+        return Verdict(INVALID, detail=f"not well-formed XML: {e}")
+    except (DoctypeError, DepthError) as e:
+        return Verdict(INVALID, detail=str(e))
     xsd_dir = Path(xsd_dir or sources.xsd_dir())
     if not xsd_dir.is_dir():
         return Verdict(UNVERIFIED, detail=f"no XSDs at {xsd_dir}")
-    try:
-        root = ET.fromstring(xml)
-    except ET.ParseError as e:
-        return Verdict(INVALID, detail=f"not well-formed XML: {e}")
     root = payload_root(root)
     index = _index(str(xsd_dir))
-    names, errors = [], []
+    names, errors, unlisted, child_tags = [], [], 0, {}
     for doc in documents(root):
         hit = index.get(doc.tag)
         if hit is None:
             errors.append(SchemaError(path="/", reason="unknown root element", element=doc.tag))
             continue
         names.append(hit[0])
-        errors.extend(_structured(e) for e in hit[1].iter_errors(doc))
+        for err in hit[1].iter_errors(doc, use_location_hints=False):
+            if len(errors) < MAX_ERRORS:
+                errors.append(_structured(err, child_tags))
+            else:
+                unlisted += 1
+    unlisted += max(0, len(errors) - MAX_ERRORS)
+    errors = errors[:MAX_ERRORS]
     if errors:
         detail = errors[0].reason
         if errors[0].reason == "unknown root element":
             detail = f"no EWS schema declares <{errors[0].element}> as a top-level element"
-        return Verdict(INVALID, schema=", ".join(names), detail=detail, errors=tuple(errors))
+        return Verdict(
+            INVALID,
+            schema=", ".join(names),
+            detail=detail,
+            errors=tuple(errors),
+            unlisted=unlisted,
+        )
     return Verdict(VALID, schema=", ".join(names))

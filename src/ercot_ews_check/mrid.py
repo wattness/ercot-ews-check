@@ -96,9 +96,10 @@ def _trading_date(mrid: str) -> date | None:
     if len(parts) < 2 or not _DATE.fullmatch(parts[1]):
         return None
     try:
-        return date(int(parts[1][:4]), int(parts[1][4:6]), int(parts[1][6:]))
+        d = date(int(parts[1][:4]), int(parts[1][4:6]), int(parts[1][6:]))
     except ValueError:
         return None
+    return d if d < date.max else None  # a trading day needs the midnight after it
 
 
 @dataclass(frozen=True)

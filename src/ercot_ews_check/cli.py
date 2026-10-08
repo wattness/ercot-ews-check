@@ -1,7 +1,8 @@
 """Command-line interface: ``ercot-ews-check <command>``.
 
 Exit status: 0 when nothing blocks, 1 when a document would be rejected or silently
-changed (or, with --strict, has warnings), 2 when a file or download fails.
+changed or was refused before checking (or, with --strict, has warnings), 2 when a file
+or download fails.
 """
 
 from __future__ import annotations
@@ -60,6 +61,8 @@ PLAIN = {
     SILENT: "ERCOT may change or ignore this without an error",
     WARNING: "Worth fixing or confirming",
 }
+# Errors for a limit of this tool's own, which ERCOT does not state.
+OWN_LIMITS = {"nesting-depth": "Not checked: nested deeper than this tool reads"}
 
 
 def _paragraph(text: str) -> str:
@@ -77,7 +80,9 @@ def cmd_explain(args) -> int:
     done = []
     order = {ERROR: 0, SILENT: 1, WARNING: 2}
     for name, rep in _reports(args):
-        if rep.blocked:
+        if rep.by_rule() & OWN_LIMITS.keys():
+            verdict = "BLOCKED: not checked; the document is past a limit of this tool."
+        elif rep.blocked:
             verdict = (
                 "BLOCKED: breaks a rule ERCOT states, or ERCOT may change it without an error."
             )
@@ -90,7 +95,8 @@ def cmd_explain(args) -> int:
         print(f"{name}\n{verdict}\n")
         for n, f in enumerate(sorted(rep.findings, key=lambda f: order.get(f.severity, 3)), 1):
             where = f" ({f.where})" if f.where else ""
-            print(f"{n}. {PLAIN.get(f.severity, f.severity)}{where}.")
+            label = OWN_LIMITS.get(f.rule) or PLAIN.get(f.severity, f.severity)
+            print(f"{n}. {label}{where}.")
             print(_paragraph(f.message))
             if f.fix:
                 print(_paragraph(f"Fix: {f.fix}"))

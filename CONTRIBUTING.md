@@ -29,9 +29,14 @@ Set `status: fixed` in that entry; do not delete it.
 - A rule that ERCOT's own documents contradict is reported as a warning, with a catalogue entry.
 - A finding cites a catalogue entry only when the entry is about the same element and the same
   kind of error.
-- New rules need a test in `tests/test_checker.py` and, where they can be broken mechanically, a
-  mutant in `src/ercot_ews_check/mutate.py` with its target rule in `mutate.TARGET`.
+- New rules need a test in `tests/test_checker.py` (a parsing refusal, in
+  `tests/test_untrusted_input.py`) and, where they can be broken mechanically, a mutant in
+  `src/ercot_ews_check/mutate.py` with its target rule in `mutate.TARGET`. Add the rule to the
+  README's rule table and to `skills/checking-ews-submissions/references/rules.md`.
 - Update the README block with `python scripts/measure.py` when a figure changes.
+- When a change alters what `ercot-ews-check check examples/broken/as-only-offer.xml` prints, run
+  `python scripts/render_terminal.py` to redraw the images in `docs/img/`, and update their alt
+  text in README.md; `tests/test_render_terminal.py` fails until the images match.
 
 ## Vendored files
 

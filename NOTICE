@@ -20,5 +20,8 @@ They are kept unmodified with their notices, and the Agreement is reproduced in
 vendor/ERCOT-TERMS-OF-USE.txt. vendor/NOTICE gives the details, the OASIS
 notices and the W3C licence.
 
-The discrepancy catalogue (discrepancies/, docs/discrepancies.md) quotes short
-passages of ERCOT's documentation for identification, each with its source.
+The discrepancy catalogue (discrepancies/, docs/discrepancies.md), the README,
+the agent skill's rule list, the checker's messages and the images in
+docs/img/ quote short passages of ERCOT's documentation to identify the rules
+they describe. The catalogue entries and the findings name the ERCOT page each
+quote comes from.

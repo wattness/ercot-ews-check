@@ -33,8 +33,9 @@ ercot-ews-check explain path/to/document.xml
 
 Replace the path with the user's file. The output has one numbered paragraph per finding: what is
 wrong, the fix, the ERCOT page the rule comes from, and any catalogue entry that may be related.
-Exit status 1 means the document breaks a rule ERCOT states, or ERCOT may change it without an
-error; 0 means nothing blocking was found; 2 means a file could not be read. For a structured
+Exit status 1 means the document breaks a rule ERCOT states, ERCOT may change it without an error,
+or the tool refused to read it (not well-formed, a DOCTYPE, or nested too deeply); 0 means nothing
+blocking was found; 2 means a file could not be read. For a structured
 report, run `ercot-ews-check check path/to/document.xml --json`.
 
 When you report back:

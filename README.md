@@ -1,9 +1,16 @@
 # ercot-ews-check
 
+[![CI](https://github.com/wattness/ercot-ews-check/actions/workflows/ci.yml/badge.svg)](https://github.com/wattness/ercot-ews-check/actions/workflows/ci.yml) [![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE) [![Python 3.10 to 3.14](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue)](.github/workflows/ci.yml) [![Unofficial: not affiliated with ERCOT](https://img.shields.io/badge/unofficial-not%20affiliated%20with%20ERCOT-lightgrey)](NOTICE)
+
 **Unofficial.** Not affiliated with or endorsed by ERCOT.
 
 Check ERCOT External Web Services (EWS) documents before you send them, and look up the places
 where ERCOT's EWS documentation disagrees with its own schemas.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/check-broken-as-only-offer-dark.svg">
+  <img src="docs/img/check-broken-as-only-offer-light.svg" alt="Terminal: ercot-ews-check check examples/broken/as-only-offer.xml reports BLOCKED, schema invalid, 5 findings: two schema errors in ASOnlyPriceCurve (see D001), a missing-required-field error (see D007), a trade-date-mismatch error and an hour-24 error, each with a fix.">
+</picture>
 
 ERCOT's product schemas make every payload field optional, because one schema serves create, get
 and cancel. A BidSet can pass the XSD and still be rejected, or changed without an error, by the
@@ -15,8 +22,9 @@ error.
 
 ## Quickstart
 
-Python 3.10 or later. Run these from the repository root. After installation the checks run
-offline: ERCOT's schemas and the pages they read are vendored in [`vendor/`](vendor/).
+Python 3.10 or later. Run these from the repository root. The checks need no ERCOT credentials,
+and after installation they run offline: ERCOT's schemas and the pages they read are vendored in
+[`vendor/`](vendor/).
 
 ```sh
 git clone https://github.com/wattness/ercot-ews-check && cd ercot-ews-check
@@ -28,35 +36,46 @@ ercot-ews-check lookup yvalue
 ercot-ews-check show D001
 ```
 
-The broken example follows the Ancillary Service Only Offer page's Message Element table, plus a
-wrong tradingDate and a 24:00 end time:
-
-```
-examples/broken/as-only-offer.xml: BLOCKED: schema invalid, 5 finding(s)
-  [error] schema at /BidSet/ASOnlyOffer/ASOnlyPriceCurve: <xvalue> is not an element of <ASOnlyPriceCurve>, and <ASOnlyPriceCurve> is missing <CurveData>, which the schema requires at this position.
-      fix: Add <CurveData>; remove <xvalue> or move it to where the schema declares it.
-      see: D001
-  ...
-  [error] hour-24 at endTime: endTime is 2026-10-15T24:00:00-05:00; ERCOT excludes 24:00 although xs:dateTime allows it.
-      fix: Write 00:00 on the following day.
-```
+The image at the top of this page is the output of the broken example, which follows the Ancillary
+Service Only Offer page's Message Element table, plus a wrong tradingDate and a 24:00 end time.
 
 `ercot-ews-check explain FILE` prints the same findings as numbered plain-English paragraphs, each
 with its fix and ERCOT source. `--json` (on `check`) prints a machine-readable report, and
 `--strict` also fails on warnings.
 
-Exit status: 0 when nothing blocks, 1 when a document breaks a stated rule or ERCOT may change it
-without an error, 2 when a file cannot be read or a download fails. A pipeline can stop on 1.
+Exit status: 0 when nothing blocks; 1 when a document breaks a stated rule, ERCOT may change it
+without an error, or it is refused before checking (not well-formed, a DOCTYPE, or nested more than
+100 levels); 2 when a file cannot be read or a download fails. A pipeline can stop on 1.
+
+## How it works
+
+`check` and `explain` take each file through the steps below. A document that fails ERCOT's XSDs
+still goes through the prose rules; only a document refused at the parsing step stops there, with
+one finding.
+
+```mermaid
+flowchart TD
+    file["EWS document: a payload,<br>a RequestMessage or<br>a SOAP envelope"]
+    file -- cannot be read --> exit2["exit 2"]
+    file --> parse["Parse as untrusted XML"]
+    parse --> refused["Not well-formed, a DOCTYPE<br>or nested over 100 levels:<br>one error, nothing else<br>checked, exit 1"]
+    parse --> xsd["Unwrap a SOAP envelope;<br>validate the document and<br>each Payload document<br>against ERCOT's XSDs"]
+    xsd --> explain["Explain the first 100 schema<br>errors, each with a fix and,<br>when one matches, a catalogue<br>entry; count the rest"]
+    explain --> prose["Apply ERCOT's prose rules:<br>requirement tables, values,<br>time and DST rules, limits"]
+    prose --> blocks{"Any error or<br>silent finding?"}
+    blocks -- yes --> exit1["BLOCKED: exit 1"]
+    blocks -- no --> exit0["OK, or OK with warnings:<br>exit 0 (1 with --strict)"]
+```
 
 ## What it checks
 
 `check` accepts a bare payload (such as a `BidSet`), a `RequestMessage`, or a SOAP envelope. A
-message's `Payload` is validated on its own, because `Message.xsd` declares it as
-`xs:any processContents="skip"`.
+message's `Payload` is validated on its own, because `Message.xsd` lets it hold any element of
+another namespace unchecked (`xsd:any processContents="skip"`).
 
 | Rule | Severity | Finds |
 |---|---|---|
-| `schema` | error | Anything ERCOT's XSDs reject, explained in plain English with a fix |
+| `schema` | error | Anything ERCOT's XSDs reject, explained in plain English with a fix; a report lists the first 100 schema errors and counts the rest |
 | `schema-unverified` | warning | The XSDs could not be loaded, so nothing was validated |
 | `missing-required-field` | error | A create without a field the product's table marks Y or K; a warning when ERCOT's own create sample leaves the field out |
 | `value-numeric-bound` | error | A value outside the bound in the table's Values column; a warning for COP `hsl` and `lsl` (D033) |
@@ -74,12 +93,19 @@ message's `Payload` is validated on its own, because `Message.xsd` declares it a
 | `silent-rrs-value1-ignored` | silent | `value1` on an RRS self-arranged quantity, which ERCOT ignores |
 | `cancel-every-hour`, `cop-cancel` | warning, error | A cancel mRID without an hour suffix; a COP cancel |
 | `payload-too-large` | error | A BidSet of 3,000,000 bytes or more before compression; ERCOT's limit is "less than 3 Mb in size(Pre-compression)", which this tool reads as 3,000,000 bytes |
+| `doctype` | error | A document type declaration (`<!DOCTYPE ...>`); ERCOT's MarkeTrak Developer Guide lists among SOAP's syntax rules "A SOAP message must NOT contain a DTD reference", which the EWS pages do not state; nothing else is checked |
+| `nesting-depth` | error | Elements nested more than 100 levels deep, far deeper than ERCOT's schemas declare; a limit of this tool, not a rule ERCOT states; nothing else is checked |
 
-Every rule other than `schema` and `schema-unverified` names the ERCOT page it comes from
-(`source` in the JSON report). "Silent" means ERCOT accepts the document and may alter or ignore
-part of it. A clean report means these checks found nothing against the vendored schema release;
-it does not predict acceptance, which also depends on credit and on validation ERCOT runs after
-receipt.
+Every rule other than `schema`, `schema-unverified` and `nesting-depth` names the ERCOT page it
+comes from (`source` in the JSON report). "Silent" means ERCOT accepts the document and may alter
+or ignore part of it. A clean report means these checks found nothing against the vendored schema
+release; it does not predict acceptance, which also depends on credit and on validation ERCOT runs
+after receipt.
+
+`check` and `explain` treat every document as untrusted. A document with a DOCTYPE is refused, so
+no DTD or entity text reaches a check; schemas load from local files only; and nothing is fetched,
+including a schema location the document names.
+[`tests/test_untrusted_input.py`](tests/test_untrusted_input.py) covers each of these.
 
 ## The discrepancy catalogue
 
@@ -167,10 +193,29 @@ python scripts/fetch_vendor.py refresh           # compare with the pinned sourc
 python scripts/fetch_vendor.py update --commit <sha>   # move the api-specs pin
 ```
 
-`refresh` downloads the terms page from www.ercot.com, which may refuse requests from outside the
-United States; it reports that file as unreachable and exits 1. Vendored files are never edited;
-corrections live in this repository's own code and catalogue. See [`NOTICE`](NOTICE) for ERCOT's
-terms and the OASIS and W3C notices.
+`refresh` and `verify --live` download from `*.ercot.com` sites, which
+[ERCOT says](https://developer.ercot.com/applications/pubapi/known-limits/#geographic-rate-limiting)
+may block some regions: "Currently, regions outside the United States of America are restricted."
+Where a download is refused, `refresh` reports that file as unreachable and exits 1, and
+`verify --live` exits 2. Vendored files are never edited; corrections live in this repository's
+own code and catalogue. See [`NOTICE`](NOTICE) for ERCOT's terms and the OASIS and W3C notices.
+
+## Related projects
+
+- [ercot/api-specs](https://github.com/ercot/api-specs): ERCOT's API specifications; its `ews/`
+  folder of XSDs, WSDLs and example files is vendored here at a pinned commit.
+- [ercot/ews-client](https://github.com/ercot/ews-client): ERCOT's sample Java client. It builds a
+  RequestMessage, signs it and sends it to ERCOT's test endpoint (MOTE, the Market Operations Test
+  Environment); it does not validate what it sends.
+
+A search of GitHub, npm, PyPI project names and Hugging Face on 8 October 2026, and a second pass
+that also covered other code hosts and package registries, found no other public tool that checks
+EWS submissions against ERCOT's XSDs and the rules in its EWS documentation. The public EWS code it
+found sends messages, fetches reports, receives ERCOT's notifications or stands in for ERCOT's
+endpoint in tests; some of it carries copies of ERCOT's XSDs, and none of it validates a payload
+against them. The closest is a mock of ERCOT's endpoint in one project's tests, which rejects a
+few malformed messages; it does not use the XSDs and applies only a few of the documented rules.
+[`docs/prior-art.md`](docs/prior-art.md) has the queries, counts and limits.
 
 ## Development
 

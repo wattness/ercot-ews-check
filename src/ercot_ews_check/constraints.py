@@ -13,6 +13,7 @@ from datetime import date, datetime
 from functools import lru_cache
 
 from ercot_ews_check import requirements
+from ercot_ews_check.dst import CENTRAL
 
 HOUR_BOUNDARY = "hour-boundary"
 NUMERIC = "numeric-bound"
@@ -33,7 +34,7 @@ _STATED = re.compile(r"\bValid\b|Required if|Must be|cannot|only if|Default \(|E
 class Constraint:
     kind: str
     field: str
-    source: str  # ERCOT's Values text, verbatim
+    source: str  # ERCOT's table text after the datatype (Description, then Values), verbatim
     lo: float | None = None
     hi: float | None = None
     values: tuple[str, ...] = ()
@@ -81,8 +82,11 @@ class Constraint:
 
 def parse_datetime(value: str) -> datetime | None:
     try:
-        return datetime.fromisoformat(str(value).strip().replace("Z", "+00:00"))
-    except ValueError:
+        dt = datetime.fromisoformat(str(value).strip().replace("Z", "+00:00"))
+        if dt.tzinfo is not None:
+            dt.astimezone(CENTRAL)  # OverflowError within a day of year 1 or year 9999
+        return dt
+    except (ValueError, OverflowError):
         return None
 
 
