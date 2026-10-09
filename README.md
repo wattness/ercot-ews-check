@@ -1,6 +1,6 @@
 # ercot-ews-check
 
-[![CI](https://github.com/wattness/ercot-ews-check/actions/workflows/ci.yml/badge.svg)](https://github.com/wattness/ercot-ews-check/actions/workflows/ci.yml) [![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE) [![Python 3.10 to 3.14](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue)](.github/workflows/ci.yml) [![Unofficial: not affiliated with ERCOT](https://img.shields.io/badge/unofficial-not%20affiliated%20with%20ERCOT-lightgrey)](NOTICE)
+[![CI](https://github.com/wattness/ercot-ews-check/actions/workflows/ci.yml/badge.svg)](https://github.com/wattness/ercot-ews-check/actions/workflows/ci.yml) [![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE) [![Python 3.10 to 3.14](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue)](.github/workflows/ci.yml) [![Hugging Face Space](https://img.shields.io/badge/Hugging%20Face-Space-ffd21e?logo=huggingface&logoColor=black)](https://huggingface.co/spaces/wattness/ercot-ews-check) [![Unofficial: not affiliated with ERCOT](https://img.shields.io/badge/unofficial-not%20affiliated%20with%20ERCOT-lightgrey)](NOTICE)
 
 **Unofficial.** Not affiliated with or endorsed by ERCOT.
 
@@ -21,6 +21,10 @@ failure at a catalogued discrepancy when the entry is about the same element and
 error.
 
 ## Quickstart
+
+To check one document without installing anything, open
+[Would ERCOT reject this file?](https://huggingface.co/spaces/wattness/ercot-ews-check), a page that
+runs this checker in your browser; the document is not uploaded.
 
 Python 3.10 or later. Run these from the repository root. The checks need no ERCOT credentials,
 and after installation they run offline: ERCOT's schemas and the pages they read are vendored in
