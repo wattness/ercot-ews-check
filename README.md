@@ -191,6 +191,10 @@ values the checker's market rules hold.
 `ercot-ews-check examples --invalid` lists the failing portal samples, and `ercot-ews-check rules`
 prints every extracted XSD constraint with its `file:line`.
 
+[`notebooks/field-note-01-ews-documentation.ipynb`](notebooks/field-note-01-ews-documentation.ipynb)
+recomputes, from the same files, where the catalogue's disagreements sit, what their documents
+show, and the chart in the first field note.
+
 ## Python
 
 ```python

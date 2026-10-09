@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- `notebooks/field-note-01-ews-documentation.ipynb` recomputes the figures and the chart in the
+  first field note, on where ERCOT's EWS documentation and its schemas disagree.
+
 ## 0.2.0 (2026-10-09)
 
 ### New checks
