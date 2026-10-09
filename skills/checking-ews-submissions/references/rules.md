@@ -9,11 +9,11 @@ Errors and silent changes block (exit status 1).
 |---|---|---|
 | `schema` | error | ERCOT's schema does not allow this element, value, order or namespace. A report lists the first 100 schema errors; one more finding counts the rest. |
 | `schema-unverified` | warning | The schemas could not be loaded, so nothing was validated. |
-| `missing-required-field` | error, or warning | ERCOT's table for this product marks a field required (Y) or a key (K), and it is missing. The schema cannot catch this because every product field is optional there (D007). A warning when ERCOT's own create sample leaves the same field out. |
+| `missing-required-field` | error, or warning | ERCOT's table for this product marks a field required (Y) or a key (K), and it is missing. The schema cannot catch this because every product field is optional there (D007). A warning when ERCOT's own create sample leaves the same field out, or when a Three-Part Offer whose curve goes below 0 MW (an Energy Storage Resource's) lacks `EocFipFop`: ERCOT's Market Submission Validation Rules (NP4-450-M, §2.1) say FIP and FOP do not apply to storage. |
 | `value-numeric-bound` | error | A number is outside the range ERCOT's table states. For COP hsl and lsl this is a warning: the Protocols allow an Energy Storage Resource's HSL and LSL below zero (D033). |
 | `value-enumerated` | warning | A value is not in the list ERCOT's table shows; the table may list examples only. |
 | `value-before-trade-date` | warning | expirationTime is not before the trade date. ERCOT's own samples break this, so it is not enforced. |
-| `value-ignored` | warning | ERCOT documents this field as ignored; sending it has no effect. |
+| `value-ignored` | warning | ERCOT documents this field as ignored; sending it has no effect. Exception: an AS Offer's `combinedCycle`, which NP4-450-M §2.2 requires for a combined-cycle Resource; keep it there. |
 | `withdrawn-payload` | error | ERCOT removed this payload type (IncDecOffer, removed with RTC+B; D010). |
 | `trade-date-mismatch` | error | tradingDate is not the Central-time date on which the payload starts; the product's table requires a start hour "for trade date". |
 | `utc-offset` | warning | A time's offset is neither UTC nor the Central-time offset in force at that instant, for example -05:00 after the November change to standard time. |

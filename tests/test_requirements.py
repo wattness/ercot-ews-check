@@ -42,6 +42,7 @@ def test_corrected_paths_exist_in_the_schema():
 
 def test_casing_corrections_exist_in_the_schema():
     assert {"source", "sink"} <= _xsd_paths("CRR")
+    assert "resource" in _xsd_paths("RTMEnergyBid")
 
 
 def test_required_paths_resolve_for_submitted_products():

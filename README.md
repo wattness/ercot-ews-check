@@ -81,10 +81,10 @@ another namespace unchecked (`xsd:any processContents="skip"`).
 |---|---|---|
 | `schema` | error | Anything ERCOT's XSDs reject, explained in plain English with a fix; a report lists the first 100 schema errors and counts the rest |
 | `schema-unverified` | warning | The XSDs could not be loaded, so nothing was validated |
-| `missing-required-field` | error | A create without a field the product's table marks Y or K; a warning when ERCOT's own create sample leaves the field out |
+| `missing-required-field` | error | A create without a field the product's table marks Y or K; a warning when ERCOT's own create sample leaves the field out, or for a Three-Part Offer whose curve goes below 0 MW (an Energy Storage Resource's) without `EocFipFop`, which ERCOT's Market Submission Validation Rules call "not applicable to ESRs" |
 | `value-numeric-bound` | error | A value outside the bound in the table's Values column; a warning for COP `hsl` and `lsl` (D033) |
 | `value-enumerated`, `value-before-trade-date` | warning | Values the table lists, where the table is not a complete rule |
-| `value-ignored` | warning | A field ERCOT documents as "Value ignored if provided" |
+| `value-ignored` | warning | A field ERCOT documents as "Value ignored if provided"; for an AS Offer's `combinedCycle`, which the Market Submission Validation Rules require for a combined-cycle Resource, the fix is to keep it there |
 | `withdrawn-payload` | error | A payload RTC+B removed (`IncDecOffer`, D010) |
 | `trade-date-mismatch` | error | `tradingDate` that is not the Central-time date of the payload's `startTime`, which the tables require to be a start hour "for trade date" |
 | `utc-offset` | warning | An offset that is neither UTC nor the Central-time offset in force at that instant, such as `-05:00` after the November change |
@@ -105,6 +105,13 @@ comes from (`source` in the JSON report). "Silent" means ERCOT accepts the docum
 or ignore part of it. A clean report means these checks found nothing against the vendored schema
 release; it does not predict acceptance, which also depends on credit and on validation ERCOT runs
 after receipt.
+
+ERCOT states more submission rules outside its EWS documentation, in the MMS Market Submission
+Validation Rules ([NP4-450-M](https://www.ercot.com/mp/data-products/data-product-details?id=NP4-450-M),
+version 3.2): the shape of offer and bid curves, minimum quantities, limits on bid counts and
+submission windows. This tool does not apply those rules yet. It cites that document only where it
+changes a finding: FIP and FOP on an Energy Storage Resource's offer, and the combined-cycle plant
+name on an AS Offer.
 
 `check` and `explain` treat every document as untrusted. A document with a DOCTYPE is refused, so
 no DTD or entity text reaches a check; schemas load from local files only; and nothing is fetched,
@@ -141,7 +148,7 @@ block and the script disagree.
 <!-- measure:start -->
 ```
 Sources: ercot/api-specs 7e785be, retrieved 2026-10-07
-Catalogue: 33 discrepancies (25 schema-wins, 3 prose-wins, 3 neither, 2 prose-stale); 64 of 64 probes still match; 28 with a reproducer; 8 reported upstream
+Catalogue: 34 discrepancies (26 schema-wins, 3 prose-wins, 3 neither, 2 prose-stale); 66 of 66 probes still match; 29 with a reproducer; 8 reported upstream
 Portal samples: 178 distinct XML blocks on EWS pages; 98 complete documents, of which 12 fail ERCOT's own XSDs
 api-specs ews/examples: 2 of 3 fail ERCOT's own XSDs (ASOnlyOffer-Example.xml, GenResParams-SOC-Example.xml)
 XSD constraints extracted: 1057 (463 required, 233 enumeration, 179 order, 151 cardinality, 12 bound, 11 length, 8 pattern)

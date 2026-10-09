@@ -52,7 +52,7 @@ PATH_CORRECTIONS: dict[tuple[str, str], str] = {
     ("ASOffer", "PriceCurve/startTime"): "ASPriceCurve/startTime",
     ("ASOffer", "PriceCurve/endTime"): "ASPriceCurve/endTime",
 }
-CASING_CORRECTIONS: dict[str, str] = {"Source": "source", "Sink": "sink"}
+CASING_CORRECTIONS: dict[str, str] = {"Source": "source", "Sink": "sink", "Resource": "resource"}
 
 _HEADER_CELLS = frozenset(
     {"Element", "Req", "Req?", "REQ", "Data type", "Datatype", "DataType", "Description",

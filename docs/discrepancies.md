@@ -3,7 +3,7 @@
 Built from `discrepancies/*.yaml` by `scripts/build_index.py`. Edit the YAML, not this file.
 Each entry's probes are re-checked by `ercot-ews-check verify`.
 
-33 entries. Resolutions:
+34 entries. Resolutions:
 
 - `schema-wins`: Follow the schema; the documentation is wrong.
 - `prose-wins`: The schema accepts it, but ERCOT's stated rule does not; follow the prose.
@@ -45,6 +45,7 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 | [D031](#d031) | Appendix H's spring-forward example has TmPoint/ending 2011-03-13T01400:00-05:00 | value-format | schema-wins | open |
 | [D032](#d032) | Some samples use the 2007-05 ews namespace; the schemas declare 2007-06 | namespace | schema-wins | open |
 | [D033](#d033) | COP table requires hsl and lsl &gt;= 0; the Protocols allow an ESR's HSL and LSL below zero | value-bound | schema-wins | open |
+| [D034](#d034) | REB table capitalises Resource; the schema and ERCOT's own REB sample use resource | element-name | schema-wins | open |
 
 ## By product
 
@@ -56,12 +57,13 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - `EnergyOnlyOffer`: [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007)
 - `IncDecOffer`: [D010](#d010)
 - `PTPObligation`: [D007](#d007)
+- `RTMEnergyBid`: [D034](#d034)
 
 ## By message
 
 - `Acknowledge`: [D021](#d021)
 - `ASObligations`: [D031](#d031)
-- `BidSet`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D029](#d029), [D032](#d032), [D033](#d033)
+- `BidSet`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D029](#d029), [D032](#d032), [D033](#d033), [D034](#d034)
 - `Dispute`: [D028](#d028)
 - `ForecastPayload`: [D022](#d022), [D023](#d023), [D024](#d024)
 - `ForecastSolarPayload`: [D024](#d024)
@@ -124,6 +126,8 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - `PriceCurve`: [D002](#d002), [D006](#d006)
 - `ReplayDetection`: [D014](#d014), [D017](#d017), [D030](#d030)
 - `ReplyCode`: [D021](#d021)
+- `resource`: [D034](#d034)
+- `Resource`: [D034](#d034)
 - `ResourceParameters`: [D019](#d019)
 - `ResourceStatus`: [D009](#d009)
 - `ResParametersSet`: [D030](#d030)
@@ -157,7 +161,7 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 
 - `Dispute Service`: [D028](#d028)
 - `Market Information Service`: [D010](#d010), [D014](#d014), [D018](#d018), [D024](#d024), [D025](#d025), [D031](#d031)
-- `Market Transaction Service`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D014](#d014), [D029](#d029), [D032](#d032), [D033](#d033)
+- `Market Transaction Service`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D014](#d014), [D029](#d029), [D032](#d032), [D033](#d033), [D034](#d034)
 - `Notifications`: [D011](#d011), [D021](#d021), [D022](#d022), [D023](#d023)
 - `Outage Scheduling Service`: [D015](#d015), [D020](#d020)
 - `Report Service`: [D027](#d027)
@@ -515,3 +519,13 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - Protocols (Nodal Protocols 3.9.1(5)(c)(ii); 2.1, definition of Low Sustained Limit (LSL) for an Energy Storage Resource (ESR). Version of 1 August 2026.): "For ESRs, the HSL may be negative ... [the LSL for an ESR is] expressed as a MW value that may be less than, equal to, or greater than zero" <https://www.ercot.com/mktrules/nprotocols/current>
 - Do: For an Energy Storage Resource, send the HSL and LSL the Protocols define, negative where the resource charges. The checker reports a negative COP hsl or lsl as a warning.
 - Note: The cited Protocols text covers HSL and LSL only; the table's &gt;=0 on hel and lel is still enforced. The same table carries the ESR state-of-charge fields (maxSOC, minSOC, targetBeginSOC), and its lel row repeats the lsl description, 'Low sustained limit in MW'.
+
+### D034
+
+**REB table capitalises Resource; the schema and ERCOT's own REB sample use resource**
+
+- Kind: element-name (the documentation spells an element name the schema does not declare). Resolution: schema-wins.
+- ERCOT says (Market Transaction Messages / Real-Time Market Energy Bid (REB); Message Element table): "Resource K string Resource Valid resource name" <https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Real-Time%20Market%20Energy%20Bid%20%28REB%29/>
+- Schema (`ErcotTransactionTypes.xsd:292`): RTMEnergyBid declares resource in lower case, as the XML example under the table writes it. XML names are case-sensitive.
+- Do: Write &lt;resource&gt;.
+- Reproduce: `ercot-ews-check reproduce D034`

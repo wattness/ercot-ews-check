@@ -57,6 +57,19 @@ SRC_SOAP = (
     "https://developer.ercot.com/applications/marketrak/MarkeTrak_API_Dev_v1_2/"
     "#71-basic-syntax-rules-of-soap"
 )
+# ERCOT's MMS Market Submission Validation Rules, posted on ercot.com, not the EWS portal.
+# Quoted from version 3.2, posted 13 Feb 2026; the .docx has SHA-256
+# 61e377c3f4b948c97e61a636883614fb8297d9a5f5c8327f474629e87d44e7c6.
+SRC_NP4_450 = "https://www.ercot.com/mp/data-products/data-product-details?id=NP4-450-M"
+# Fields a product table calls "Value ignored if provided" that NP4-450 requires in some cases:
+# (payload, path) -> (section, NP4-450's words, fix).
+IGNORED_BUT_REQUIRED = {
+    ("ASOffer", "combinedCycle"): (
+        "§2.2",
+        "required for Combined Cycle Resources only",
+        "Keep it for a Resource in a combined cycle; leave it out otherwise.",
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -138,6 +151,21 @@ def _values_text(rule: constraints.Constraint) -> str:
     return rule.source[stated.start() :] if stated else rule.source
 
 
+def _np4_450(section: str) -> str:
+    return f"ERCOT's Market Submission Validation Rules (NP4-450-M, {section})"
+
+
+def _curve_below_zero(payload: ET.Element) -> bool:
+    """True when an offer curve reaches below 0 MW, which only an Energy Storage Resource's can."""
+    for x in _texts(payload, "xvalue"):
+        try:
+            if float(x.text) < 0:
+                return True
+        except ValueError:
+            continue
+    return False
+
+
 def _texts(root: ET.Element, name: str) -> list[ET.Element]:
     return [el for el in root.iter() if local(el.tag) == name and (el.text or "").strip()]
 
@@ -196,8 +224,18 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
         omitted = examples.create_omissions()
         hard = [p for p in gone if (tag, p) not in omitted]
         soft = [p for p in gone if (tag, p) in omitted]
+        fip_fop = [p for p in hard if tag == "ThreePartOffer" and p.startswith("EocFipFop/")]
+        storage = bool(fip_fop) and _curve_below_zero(payload)
+        if storage:
+            hard = [p for p in hard if p not in fip_fop]
         source = f"{PORTAL}/Market%20Transaction%20Messages/{page}/"
         if hard:
+            fix = "Add the fields listed."
+            if fip_fop and not storage:
+                fix += (
+                    f" For an Energy Storage Resource, {_np4_450('§2.1')} say FIP and FOP do not"
+                    " apply; this check treats an offer as one only when its curve goes below 0 MW."
+                )
             rep.findings.append(
                 Finding(
                     "missing-required-field",
@@ -206,9 +244,25 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
                     f"{', '.join(hard)}. The XSD cannot catch this: every payload field is "
                     "minOccurs=0.",
                     tag,
-                    "Add the fields listed.",
+                    fix,
                     (*_see_required(hard), "D007"),
                     source,
+                )
+            )
+        if storage:
+            rep.findings.append(
+                Finding(
+                    "missing-required-field",
+                    WARNING,
+                    f"{tag} lacks {', '.join(fip_fop)}, which ERCOT's table marks required (Y). "
+                    "Its curve goes below 0 MW, so the Resource is an Energy Storage Resource, and "
+                    f"{_np4_450('§2.1')} say FIP and FOP for the curve are "
+                    '"not applicable to ESRs".',
+                    tag,
+                    "Leave EocFipFop out only if you have confirmed ERCOT accepts the offer "
+                    "without it.",
+                    _see_required(fip_fop),
+                    SRC_NP4_450,
                 )
             )
         for path in soft:
@@ -265,16 +319,19 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
                 )
             )
         for path in sorted(_ignored_fields().get(tag, ()) & present):
-            rep.findings.append(
-                Finding(
-                    "value-ignored",
-                    WARNING,
-                    f'{tag}/{path} is documented as "Value ignored if provided"; whatever is '
-                    "sent here has no effect.",
-                    path,
-                    "Remove the field, and do not expect ERCOT to echo it back.",
-                    source=source,
+            message = (
+                f'{tag}/{path} is documented as "Value ignored if provided"; whatever is '
+                "sent here has no effect."
+            )
+            fix = "Remove the field, and do not expect ERCOT to echo it back."
+            if (tag, path) in IGNORED_BUT_REQUIRED:
+                section, words, fix = IGNORED_BUT_REQUIRED[(tag, path)]
+                message = (
+                    f'{tag}/{path} is documented as "Value ignored if provided", but '
+                    f'{_np4_450(section)} list it as "{words}".'
                 )
+            rep.findings.append(
+                Finding("value-ignored", WARNING, message, path, fix, source=source)
             )
         if trade_el is not None and start_dt is not None and start_dt.tzinfo is not None:
             stated = (trade_el.text or "").strip()

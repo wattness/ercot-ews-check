@@ -22,6 +22,7 @@ notices and the W3C licence.
 
 The discrepancy catalogue (discrepancies/, docs/discrepancies.md), the README,
 the agent skill's rule list, the checker's messages and the images in
-docs/img/ quote short passages of ERCOT's documentation to identify the rules
-they describe. The catalogue entries and the findings name the ERCOT page each
+docs/img/ quote short passages of ERCOT's documentation, including its MMS
+Market Submission Validation Rules (NP4-450-M), to identify the rules they
+describe. The catalogue entries and the findings name the ERCOT page each
 quote comes from.

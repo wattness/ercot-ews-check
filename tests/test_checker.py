@@ -177,6 +177,71 @@ def test_value_ignored():
 """)
     f = finding(xml, "value-ignored")
     assert f.severity == WARNING and "Ancillary%20Service%20Offer" in f.source
+    # NP4-450 §2.2 requires the plant name for a combined-cycle Resource, so not "Remove".
+    assert "(NP4-450-M, §2.2)" in f.message and f.fix.startswith("Keep it")
+
+
+def three_part_offer(low: str, fip_fop: bool = False) -> str:
+    eoc = (
+        "    <EocFipFop>\n      <startTime>2026-10-15T00:00:00-05:00</startTime>\n"
+        "      <endTime>2026-10-16T00:00:00-05:00</endTime>\n"
+        "      <fipPercent>0</fipPercent>\n      <fopPercent>0</fopPercent>\n    </EocFipFop>\n"
+    )
+    return bidset(f"""  <ThreePartOffer>
+    <startTime>2026-10-15T00:00:00-05:00</startTime>
+    <endTime>2026-10-16T00:00:00-05:00</endTime>
+    <expirationTime>2026-10-14T10:00:00-05:00</expirationTime>
+    <resource>RESOURCE1</resource>
+{eoc if fip_fop else ""}    <EnergyOfferCurve>
+      <startTime>2026-10-15T17:00:00-05:00</startTime>
+      <endTime>2026-10-15T18:00:00-05:00</endTime>
+      <CurveData><xvalue>{low}</xvalue><y1value>15.00</y1value></CurveData>
+      <CurveData><xvalue>10.0</xvalue><y1value>35.50</y1value></CurveData>
+      <incExcFlag>INC</incExcFlag>
+      <reason>OTHR</reason>
+    </EnergyOfferCurve>
+  </ThreePartOffer>
+""")
+
+
+def test_storage_offer_without_fip_fop_is_a_warning():
+    # NP4-450 §2.1: FIP and FOP for the curve are "not applicable to ESRs"; a point below
+    # 0 MW is what marks an Energy Storage Resource's curve.
+    rep = check(three_part_offer("-10.0"))
+    f = finding(three_part_offer("-10.0"), "missing-required-field")
+    assert not rep.blocked and f.severity == WARNING
+    assert f.source == checker.SRC_NP4_450 and "not applicable to ESRs" in f.message
+    assert check(three_part_offer("-10.0", fip_fop=True)).findings == []
+
+
+def test_offer_without_fip_fop_is_blocked_when_nothing_marks_storage():
+    f = finding(three_part_offer("0.0"), "missing-required-field")
+    assert check(three_part_offer("0.0")).blocked and f.severity == ERROR
+    assert "EocFipFop/fipPercent" in f.message and "Energy Storage Resource" in f.fix
+    assert check(three_part_offer("0.0", fip_fop=True)).findings == []
+
+
+def rtm_energy_bid(resource: str) -> str:
+    return bidset(f"""  <RTMEnergyBid>
+    <startTime>2026-10-15T00:00:00-05:00</startTime>
+    <endTime>2026-10-16T00:00:00-05:00</endTime>
+    <expirationTime>2026-10-15T12:00:00-05:00</expirationTime>
+{resource}    <PriceCurve>
+      <startTime>2026-10-15T17:00:00-05:00</startTime>
+      <endTime>2026-10-15T18:00:00-05:00</endTime>
+      <CurveData><xvalue>0</xvalue><y1value>50.00</y1value></CurveData>
+      <CurveData><xvalue>5.0</xvalue><y1value>40.00</y1value></CurveData>
+    </PriceCurve>
+  </RTMEnergyBid>
+""")
+
+
+def test_rtm_energy_bid_resource_spelled_as_the_schema_does():
+    # The REB table spells the key "Resource"; the XSD and ERCOT's own sample, "resource" (D034).
+    assert check(rtm_energy_bid("    <resource>RESOURCE1</resource>\n")).findings == []
+    f = finding(rtm_energy_bid(""), "missing-required-field")
+    assert f.severity == ERROR and f.message.endswith("is minOccurs=0.")
+    assert ": resource." in f.message
 
 
 def test_rrs_value1_is_ignored_by_ercot():
