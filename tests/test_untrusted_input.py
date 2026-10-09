@@ -175,8 +175,11 @@ def test_a_str_that_cannot_be_encoded_is_not_well_formed():
         energy_only_offer(start="0001-01-01T00:00:00+05:00"),
         energy_only_offer(mw="1e9999999"),
         cancel("QSE1.99991231.EOO.HB_HOUSTON.eoo01.14"),
+        f'<BidSet xmlns="{EWS}"><tradingDate>0001-01-01</tradingDate><ThreePartOffer>'
+        "<EnergyOfferCurve><CurveData><xvalue>50</xvalue><y1value>3000</y1value></CurveData>"
+        "</EnergyOfferCurve></ThreePartOffer></BidSet>",
     ],
-    ids=["year-9999", "year-1", "huge-exponent", "cancel-9999-12-31"],
+    ids=["year-9999", "year-1", "huge-exponent", "cancel-9999-12-31", "offer-cap-on-day-1"],
 )
 def test_values_at_the_edges_of_the_calendar_and_of_decimal_return_a_report(xml):
     assert check(xml).schema in (schema.VALID, schema.INVALID)

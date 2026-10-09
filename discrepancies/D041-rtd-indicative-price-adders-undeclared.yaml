@@ -1,0 +1,56 @@
+id: D041
+slug: rtd-indicative-price-adders-undeclared
+title: The RTD Indicative Price Adders page draws and names a payload RTDIndicativePriceAdders; no schema
+  declares it
+kind: element-name
+resolution: neither
+status: open
+ercot_says:
+  page: Market Information Messages / RTD Indicative Price Adders
+  location: diagram (RTDIndicativePriceAdders.png), with the request and response tables and the XML
+    example
+  quote: RTDIndicativePriceAdders ... RTDIndicativePriceAdder
+  observed: The diagram draws RTDIndicativePriceAdders holding any number of RTDIndicativePriceAdder. The
+    page's second diagram (RTDIndicativePriceAdder.png) gives that element 28 children, among them
+    BatchID and RTMCPCRUS. The page's tables use RTDIndicativePriceAdders as the noun and the payload, and
+    its XML example has that root.
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/RTD%20Indicative%20Price%20Adders/
+schema_says:
+  file: ErcotInformation.xsd
+  line: 211
+  rule: The RTD price-adder payload ErcotInformation.xsd declares is RTDPriceAdders, with RTDPriceAdder
+    children (the RTD Price Adders page). No schema declares RTDIndicativePriceAdders,
+    RTDIndicativePriceAdder, RTMCPCRUS or the other RTMCPC elements, and BatchID survives only inside
+    commented-out types, although ErcotInformationTypes.xsd's change log (line 73) says "Added
+    RTDIndicativePriceAdder".
+do: Do not expect RTDIndicativePriceAdders replies to validate against the published XSDs; read them by
+  element name. RTDPriceAdders, which the schema declares, is a different report with different fields.
+lookup:
+  messages:
+  - RTDIndicativePriceAdders
+  elements:
+  - RTDIndicativePriceAdders
+  - RTDIndicativePriceAdder
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <RTDIndicativePriceAdders xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <RTDIndicativePriceAdder>
+        <BatchID>BatchID0</BatchID>
+        <RTDTimestamp>10/15/2026 14:50:03</RTDTimestamp>
+        <RepeatedHourFlag>N</RepeatedHourFlag>
+      </RTDIndicativePriceAdder>
+    </RTDIndicativePriceAdders>
+probes:
+  portal:
+    page: Market%20Information%20Messages/RTD%20Indicative%20Price%20Adders
+    text: Header/Noun RTDIndicativePriceAdders
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/RTDIndicativePriceAdders.png
+    sha256: a01b98c4f08ce8a0a1cfd374f05292f033a01465bb57a6e5957fd30c88c411a9
+  schema:
+    file: ErcotInformation.xsd
+    pattern: <xs:element name="RTDPriceAdders">
+notes: The reproducer has only an invalid document, because nothing declares the element. The page is
+  not marked as removed, unlike RTD Indicative ORDC Price Adders.

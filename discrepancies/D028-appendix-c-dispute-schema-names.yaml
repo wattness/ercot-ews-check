@@ -6,10 +6,10 @@ kind: file-name
 resolution: schema-wins
 status: open
 ercot_says:
-  page: 'Appendices / Appendix C: XSD Relationships for Submissions'
+  page: 'Appendices / Appendix C: XML Schemas for Message and Payload Definitions'
   location: diagram (XSD Relationships for Submissions.png)
   quote: ErcotDispute.xsd, ErcotDisputeTypes.xsd
-  url: https://developer.ercot.com/applications/ews/Appendices/Appendix%20C_%20XSD%20Relationships%20for%20Submissions/
+  url: https://developer.ercot.com/applications/ews/Appendices/Appendix%20C_%20XML%20Schemas%20for%20Message%20and%20Payload%20Definitions/
 schema_says:
   file: ErcotDisputes.xsd
   line: 12

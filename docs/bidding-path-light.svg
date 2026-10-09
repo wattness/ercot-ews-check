@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1584" viewBox="0 0 960 1584" role="img" aria-labelledby="title desc">
+<title id="title">How a bid travels through ERCOT's External Web Services</title>
+<desc id="desc">A QSE's Market Participant System sends a signed SOAP envelope over HTTPS with mutual authentication; its Body holds a RequestMessage whose Payload is a BidSet. ERCOT's Nodal External Interface runs Phase Zero validation and replies at once with a ResponseMessage giving each bid SUBMITTED and an mRID. The MMS runs Phase One validation; a Notify to the QSE's listener reports each bid ACCEPTED, PENDING or ERRORS, and the listener answers with an Acknowledge. At 07:00 CT the day before the Operating Day the MMS runs Phase Two validation and notifies the bids it cancels in a P2ValidationSet. After the close of the market, awards are notified in an AwardSet. Get Notifications fetches notifications already sent. Unofficial; not affiliated with or endorsed by ERCOT.</desc>
+<style>
+text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; font-size: 13px; fill: #1f2328; }
+.mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 12.5px; }
+.title { font-size: 22px; font-weight: 600; }
+.h2 { font-size: 15px; font-weight: 600; }
+.b { font-weight: 600; }
+.s { font-size: 12.5px; }
+.xs { font-size: 12px; }
+.mid { text-anchor: middle; }
+.end { text-anchor: end; }
+.muted { fill: #59636e; }
+.side { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; fill: #59636e; }
+.canvas { fill: #ffffff; stroke: #d1d9e0; }
+.plate { fill: #ffffff; }
+.frame { fill: none; stroke: #818b98; stroke-dasharray: 6 4; }
+.box { fill: #ffffff; stroke: #d1d9e0; }
+.inset { fill: #f6f8fa; stroke: #d1d9e0; }
+.bar { fill: #8250df; }
+.life { stroke: #d1d9e0; stroke-width: 1.5; }
+.divider { stroke: #818b98; stroke-width: 1; stroke-dasharray: 2 4; }
+.rule { stroke: #818b98; stroke-width: 1; stroke-dasharray: 6 4; }
+.msg { stroke: #1f2328; stroke-width: 1.5; }
+.reply { stroke: #59636e; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.head { fill: #1f2328; }
+.headm { fill: #59636e; }
+.num { fill: #0969da; }
+.numt { font-size: 11px; font-weight: 700; text-anchor: middle; fill: #ffffff; }
+.sec { fill: #fff1e5; stroke: #bc4c00; }
+.sect { font-size: 10.5px; font-weight: 700; text-anchor: middle; fill: #bc4c00; }
+</style>
+<defs>
+<marker id="head" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" class="head"/></marker>
+<marker id="headm" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" class="headm"/></marker>
+</defs>
+<rect class="canvas" x="0.5" y="0.5" width="959" height="1583" rx="6"/>
+
+<text class="title" x="24" y="44">How a bid travels through ERCOT's External Web Services</text>
+<text class="muted" x="24" y="68">From a QSE's system to ERCOT's Market Transaction Service, through ERCOT's validation phases, and back to the QSE's listener.</text>
+<text class="muted" x="24" y="87">Names are ERCOT's. Unofficial: not affiliated with or endorsed by ERCOT. Sources: docs/bidding-path.md.</text>
+
+<!-- What the Market Participant System sends: 1 to 4 -->
+<text class="h2" x="24" y="126">What the Market Participant System sends</text>
+<rect class="frame" x="24.5" y="138.5" width="911" height="343" rx="8"/>
+<circle class="num" cx="44" cy="158" r="10"/><text class="numt" x="44" y="162">1</text>
+<text x="62" y="162.5">HTTPS with mutual authentication: ERCOT's server certificate and the QSE's client certificate</text>
+
+<rect class="inset" x="38.5" y="174.5" width="883" height="297" rx="6"/>
+<text class="mono muted" x="52" y="193">SOAP-ENV:Envelope</text>
+
+<rect class="box" x="52.5" y="203.5" width="855" height="74" rx="5"/>
+<text class="mono muted" x="66" y="222">SOAP-ENV:Header</text>
+<circle class="num" cx="76" cy="241" r="10"/><text class="numt" x="76" y="245">2</text>
+<text class="mono" x="92" y="245">wsse:Security</text>
+<text x="206" y="245">BinarySecurityToken: the signer's X.509 certificate (X.509 Certificate Token Profile)</text>
+<rect class="sec" x="206.5" y="252.5" width="24" height="16" rx="4"/><text class="sect" x="218.5" y="264.5">S1</text>
+<text x="238" y="265">Signature over the Body; Appendix D's sample uses SignatureMethod rsa-sha1</text>
+
+<rect class="box" x="52.5" y="285.5" width="855" height="176" rx="5"/>
+<text x="66" y="304"><tspan class="mono muted">SOAP-ENV:Body</tspan><tspan class="muted"> · covered by the signature</tspan></text>
+<rect class="inset" x="66.5" y="314.5" width="827" height="137" rx="5"/>
+<text class="mono b" x="80" y="333">RequestMessage</text>
+<circle class="num" cx="90" cy="352" r="10"/><text class="numt" x="90" y="356">3</text>
+<text class="mono" x="106" y="356">Header</text>
+<text x="206" y="356">Verb create · Noun BidSet · ReplayDetection · Revision · Source · UserID</text>
+<rect class="sec" x="206.5" y="363.5" width="24" height="16" rx="4"/><text class="sect" x="218.5" y="375.5">S2</text>
+<text x="238" y="376">ReplayDetection holds Nonce, then Created; a Nonce is not repeated for at least a day</text>
+<text x="206" y="395">Source: the QSE's short name, which ERCOT checks against the certificate</text>
+<circle class="num" cx="90" cy="415" r="10"/><text class="numt" x="90" y="419">4</text>
+<text class="mono" x="106" y="419">Payload</text>
+<text x="206" y="419">BidSet: tradingDate, then one product type, repeated · one BidSet per message, one trading date</text>
+<text x="206" y="438">under 3 MB before compression · above 1 MB: gzip, then base64, in Payload/Compressed</text>
+
+<!-- Where it goes, and what comes back: 5 to 14 -->
+<text class="h2" x="24" y="520">Where it goes, and what comes back</text>
+<text class="side" x="24" y="546">QSE</text>
+<text class="side" x="480" y="546">ERCOT</text>
+
+<line class="divider" x1="467" y1="532" x2="467" y2="1526"/>
+<line class="life" x1="122" y1="620" x2="122" y2="1526"/>
+<line class="life" x1="336" y1="620" x2="336" y2="1526"/>
+<line class="life" x1="600" y1="620" x2="600" y2="1526"/>
+<line class="life" x1="830" y1="620" x2="830" y2="1526"/>
+
+<rect class="box" x="24.5" y="556.5" width="196" height="64" rx="6"/>
+<text class="b mid" x="122" y="577">Market Participant</text>
+<text class="b mid" x="122" y="595">Notification Service</text>
+<text class="xs muted mid" x="122" y="612">the QSE's listener</text>
+<rect class="box" x="238.5" y="556.5" width="196" height="64" rx="6"/>
+<text class="b mid" x="336" y="577">Market Participant</text>
+<text class="b mid" x="336" y="595">System</text>
+<text class="xs muted mid" x="336" y="612">the QSE's system</text>
+<rect class="box" x="500.5" y="556.5" width="200" height="64" rx="6"/>
+<text class="b mid" x="600" y="577">ERCOT Nodal</text>
+<text class="b mid" x="600" y="595">External Interface</text>
+<text class="xs muted mid" x="600" y="612">Market Transaction Service</text>
+<rect class="box" x="732.5" y="556.5" width="196" height="64" rx="6"/>
+<text class="b mid" x="830" y="584">MMS</text>
+<text class="xs muted mid" x="830" y="603">Market Management System</text>
+
+<line class="rule" x1="24" y1="1128" x2="936" y2="1128"/>
+<line class="rule" x1="24" y1="1352" x2="936" y2="1352"/>
+
+<line class="msg" x1="336" y1="662" x2="600" y2="662" marker-end="url(#head)"/>
+<line class="reply" x1="600" y1="834" x2="336" y2="834" marker-end="url(#headm)"/>
+<line class="msg" x1="600" y1="900" x2="830" y2="900" marker-end="url(#head)"/>
+<line class="msg" x1="600" y1="1046" x2="122" y2="1046" marker-end="url(#head)"/>
+<line class="reply" x1="122" y1="1100" x2="600" y2="1100" marker-end="url(#headm)"/>
+<line class="msg" x1="600" y1="1306" x2="122" y2="1306" marker-end="url(#head)"/>
+<line class="msg" x1="600" y1="1386" x2="122" y2="1386" marker-end="url(#head)"/>
+<line class="msg" x1="336" y1="1440" x2="600" y2="1440" marker-end="url(#head)"/>
+<line class="reply" x1="600" y1="1506" x2="336" y2="1506" marker-end="url(#headm)"/>
+
+<!-- 6 Phase Zero -->
+<rect class="inset" x="480.5" y="694.5" width="240" height="109" rx="5"/>
+<rect class="bar" x="480.5" y="694.5" width="4" height="109"/>
+<circle class="num" cx="502" cy="712" r="10"/><text class="numt" x="502" y="716">6</text>
+<text class="b" x="518" y="716">Phase Zero</text>
+<text x="496" y="739">External Interface validation:</text>
+<text x="496" y="756">XML message structure and</text>
+<text x="496" y="773">certificate security checks;</text>
+<text x="496" y="790">marked 'received' or 'rejected'</text>
+
+<!-- 8 Phase One -->
+<rect class="inset" x="640.5" y="914.5" width="296" height="99" rx="5"/>
+<rect class="bar" x="640.5" y="914.5" width="4" height="99"/>
+<circle class="num" cx="662" cy="932" r="10"/><text class="numt" x="662" y="936">8</text>
+<text class="b" x="678" y="936">Phase One MMS Validation</text>
+<text x="656" y="959">on receipt: XML format, QSE permission</text>
+<text x="656" y="976">and content rules from the Protocols;</text>
+<text x="656" y="993">asynchronous, may take several minutes</text>
+
+<!-- 11 Phase Two -->
+<rect class="inset" x="640.5" y="1140.5" width="296" height="133" rx="5"/>
+<rect class="bar" x="640.5" y="1140.5" width="4" height="133"/>
+<circle class="num" cx="662" cy="1158" r="10"/><text class="numt" x="662" y="1162">11</text>
+<text class="b" x="678" y="1162">Phase Two MMS Validation</text>
+<text x="656" y="1185">at 07:00 for earlier submissions that</text>
+<text x="656" y="1202">passed Phase One, and after 07:00</text>
+<text x="656" y="1219">at receipt. Adds rules such as credit</text>
+<text x="656" y="1236">exposure vs. available credit. Avoid</text>
+<text x="656" y="1253">next-day submissions 06:55 to 07:05.</text>
+
+<!-- plates under the labels that cross a lifeline or the divider -->
+<rect class="plate" x="364" y="639" width="215" height="17"/>
+<rect class="plate" x="364" y="668" width="195" height="16"/>
+<rect class="plate" x="364" y="811" width="225" height="17"/>
+<rect class="plate" x="364" y="840" width="233" height="33"/>
+<rect class="plate" x="152" y="1023" width="385" height="17"/>
+<rect class="plate" x="184" y="1053" width="361" height="18"/>
+<rect class="plate" x="152" y="1077" width="401" height="17"/>
+<rect class="plate" x="653" y="1108" width="287" height="17"/>
+<rect class="plate" x="152" y="1283" width="221" height="17"/>
+<rect class="plate" x="152" y="1312" width="331" height="16"/>
+<rect class="plate" x="645" y="1332" width="295" height="17"/>
+<rect class="plate" x="152" y="1363" width="322" height="17"/>
+<rect class="plate" x="152" y="1392" width="432" height="16"/>
+<rect class="plate" x="364" y="1417" width="157" height="17"/>
+<rect class="plate" x="364" y="1446" width="229" height="33"/>
+<rect class="plate" x="364" y="1483" width="181" height="17"/>
+
+<!-- 5 RequestMessage -->
+<circle class="num" cx="352" cy="649" r="10"/><text class="numt" x="352" y="653">5</text>
+<text x="368" y="653">RequestMessage: create BidSet</text>
+<text class="s muted" x="368" y="679">operation MarketTransactions</text>
+
+<!-- 7 ResponseMessage -->
+<circle class="num" cx="352" cy="821" r="10"/><text class="numt" x="352" y="825">7</text>
+<text x="368" y="825">ResponseMessage (synchronous)</text>
+<text class="s muted" x="368" y="851">ReplyCode OK, ERROR or FATAL</text>
+<text class="s muted" x="368" y="868">each bid SUBMITTED, with its mRID</text>
+
+<!-- 8 to MMS -->
+<text class="s muted" x="616" y="891">to MMS</text>
+
+<!-- 9 Notify -->
+<circle class="num" cx="140" cy="1033" r="10"/><text class="numt" x="140" y="1037">9</text>
+<text x="156" y="1037">Notify: BidSet, each bid ACCEPTED, PENDING or ERRORS</text>
+<rect class="sec" x="156.5" y="1053.5" width="24" height="16" rx="4"/><text class="sect" x="168.5" y="1065.5">S1</text>
+<text class="s muted" x="188" y="1066">signed by ERCOT; HTTPS to the listener's URL, port 443</text>
+
+<!-- 10 Acknowledge -->
+<circle class="num" cx="140" cy="1087" r="10"/><text class="numt" x="140" y="1091">10</text>
+<text x="156" y="1091">Acknowledge: ReplyCode OK or ERROR; need not be signed</text>
+
+<text class="s muted end" x="936" y="1121">07:00 CT, the day before the Operating Day</text>
+
+<!-- 12 P2ValidationSet -->
+<circle class="num" cx="140" cy="1293" r="10"/><text class="numt" x="140" y="1297">12</text>
+<text x="156" y="1297">Notify: canceled P2ValidationSet</text>
+<text class="s muted" x="156" y="1323">DAM Phase II Validation Results: cancellations only</text>
+
+<text class="s muted end" x="936" y="1345">DAM submission deadline, normally 10:00 CT</text>
+
+<!-- 13 awards -->
+<circle class="num" cx="140" cy="1373" r="10"/><text class="numt" x="140" y="1377">13</text>
+<text x="156" y="1377">Notify: created, awards in an AwardSet payload</text>
+<text class="s muted" x="156" y="1403">after the close of the market: AwardedEnergyOffer, AwardedAS, ...</text>
+
+<!-- 14 Get Notifications -->
+<circle class="num" cx="352" cy="1427" r="10"/><text class="numt" x="352" y="1431">14</text>
+<text x="368" y="1431">get BidSetNotifications</text>
+<text class="s muted" x="368" y="1457">Get Notifications: up to 4 days old,</text>
+<text class="s muted" x="368" y="1474">24 hours per query</text>
+<text class="s muted" x="368" y="1497">reply: NotificationMessages</text>
+
+<text class="xs muted" x="24" y="1560">Solid arrow: a message sent; dashed: its reply. 1 to 14: sources in docs/bidding-path.md; S1, S2: its security note.</text>
+</svg>

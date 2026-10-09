@@ -1,0 +1,44 @@
+id: D045
+slug: forecast-notification-verb-create
+title: Wind and Solar Generation Forecast tables give Header/Verb create; notification verbs are documented
+  as past tense
+kind: documentation
+resolution: neither
+status: open
+ercot_says:
+  page: Notifications Messages / Wind Generation Forecast, Solar Generation Forecast
+  location: response message structure table
+  quote: Header/Verb create Header/Noun WindForecastData
+  url: https://developer.ercot.com/applications/ews/Notifications%20Messages/Wind%20Generation%20Forecast/
+schema_says:
+  file: Message.xsd
+  line: 79
+  rule: HeaderType/Verb enumerates both create (line 79) and created (line 80), so either validates; no
+    schema ties a tense to a notification.
+do: In a listener, accept create as well as created on a WindForecastData or SolarForecastData notification,
+  and route on Header/Noun rather than on the verb.
+lookup:
+  messages:
+  - ForecastPayload
+  - ForecastSolarPayload
+  - ResponseMessage
+  elements:
+  - Verb
+  - Header
+  values:
+  - create
+  - WindForecastData
+  - SolarForecastData
+  endpoints:
+  - Notifications
+probes:
+  portal:
+    page: Wind%20Generation%20Forecast
+    text: Header/Verb create Header/Noun WindForecastData
+  schema:
+    file: Message.xsd
+    pattern: <xsd:enumeration value="create"/>
+notes: Services Organization (Message Header, https://developer.ercot.com/applications/ews/Services%20Organization/#message-header)
+  says notification messages use past-tense verbs, naming created, changed, canceled and closed. Every
+  other notification page's table gives a past-tense verb; Confirmed and Unconfirmed Trades writes it
+  Created, which D015 covers. No ERCOT sample shows the header of a forecast notification.

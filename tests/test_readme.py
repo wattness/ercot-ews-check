@@ -43,3 +43,7 @@ def test_image_description_matches_the_report():
     rep = check_file(ROOT / file)
     shown = (verdict, state, int(count))
     assert shown == ("BLOCKED" if rep.blocked else "OK", rep.schema, len(rep.findings))
+
+
+def test_links_the_notifications_page():
+    assert "(docs/notifications.md)" in README

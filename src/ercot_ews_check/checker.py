@@ -8,9 +8,10 @@ asynchronously, and credit and other checks run after anything done here.
 from __future__ import annotations
 
 import json
+import re
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from functools import lru_cache
 from itertools import pairwise
 from pathlib import Path
@@ -21,6 +22,7 @@ from ercot_ews_check import (
     examples,
     explain,
     hazards,
+    market_rules,
     mrid,
     requirements,
     schema,
@@ -28,7 +30,7 @@ from ercot_ews_check import (
 )
 from ercot_ews_check import withdrawn as wd
 from ercot_ews_check.dst import CENTRAL, trading_date
-from ercot_ews_check.namespaces import EWS, MESSAGE, local, q
+from ercot_ews_check.namespaces import EWS, MESSAGE, NOTIFICATION, local, q
 from ercot_ews_check.submission import check_size
 from ercot_ews_check.values import CURVE_STYLE_POINTS, MW_DECIMALS, decimals
 
@@ -57,10 +59,8 @@ SRC_SOAP = (
     "https://developer.ercot.com/applications/marketrak/MarkeTrak_API_Dev_v1_2/"
     "#71-basic-syntax-rules-of-soap"
 )
-# ERCOT's MMS Market Submission Validation Rules, posted on ercot.com, not the EWS portal.
-# Quoted from version 3.2, posted 13 Feb 2026; the .docx has SHA-256
-# 61e377c3f4b948c97e61a636883614fb8297d9a5f5c8327f474629e87d44e7c6.
-SRC_NP4_450 = "https://www.ercot.com/mp/data-products/data-product-details?id=NP4-450-M"
+# ERCOT's MMS Market Submission Validation Rules (NP4-450-M); see market_rules.
+SRC_NP4_450 = market_rules.SRC_NP4_450
 # Fields a product table calls "Value ignored if provided" that NP4-450 requires in some cases:
 # (payload, path) -> (section, NP4-450's words, fix).
 IGNORED_BUT_REQUIRED = {
@@ -151,19 +151,7 @@ def _values_text(rule: constraints.Constraint) -> str:
     return rule.source[stated.start() :] if stated else rule.source
 
 
-def _np4_450(section: str) -> str:
-    return f"ERCOT's Market Submission Validation Rules (NP4-450-M, {section})"
-
-
-def _curve_below_zero(payload: ET.Element) -> bool:
-    """True when an offer curve reaches below 0 MW, which only an Energy Storage Resource's can."""
-    for x in _texts(payload, "xvalue"):
-        try:
-            if float(x.text) < 0:
-                return True
-        except ValueError:
-            continue
-    return False
+_np4_450 = market_rules.np4_450
 
 
 def _texts(root: ET.Element, name: str) -> list[ET.Element]:
@@ -194,8 +182,15 @@ def _schema_findings(rep: Report, verdict: schema.Verdict) -> None:
         )
 
 
-def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_message: bool) -> None:
+def _payload_findings(
+    rep: Report,
+    bidset: ET.Element,
+    creating: bool,
+    in_message: bool,
+    created: datetime | None = None,
+) -> None:
     trade_el = bidset.find(q(EWS, "tradingDate"))
+    stated_day = _date((trade_el.text or "") if trade_el is not None else "")
     for payload in bidset:
         tag = local(payload.tag)
         if tag == "tradingDate":
@@ -216,6 +211,11 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
                 )
             )
             continue
+        if submitting:
+            for p in market_rules.check_payload(tag, payload, stated_day, created):
+                rep.findings.append(
+                    Finding(p.rule, p.severity, p.message, p.where, p.fix, p.see, p.source)
+                )
         page = requirements.page_for(tag)
         if page is None:
             continue
@@ -225,7 +225,7 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
         hard = [p for p in gone if (tag, p) not in omitted]
         soft = [p for p in gone if (tag, p) in omitted]
         fip_fop = [p for p in hard if tag == "ThreePartOffer" and p.startswith("EocFipFop/")]
-        storage = bool(fip_fop) and _curve_below_zero(payload)
+        storage = bool(fip_fop) and market_rules.below_zero(payload)
         if storage:
             hard = [p for p in hard if p not in fip_fop]
         source = f"{PORTAL}/Market%20Transaction%20Messages/{page}/"
@@ -338,6 +338,28 @@ def _payload_findings(rep: Report, bidset: ET.Element, creating: bool, in_messag
             _trade_date(
                 rep, tag, stated, start.text.strip(), start_dt, rules.get("startTime"), source
             )
+
+
+def _date(text: str) -> date | None:
+    try:
+        return date.fromisoformat(text.strip())
+    except ValueError:
+        return None
+
+
+# xs:dateTime with a UTC offset. Created is typed wsu:AttributedDateTime, an extension of
+# xs:string, so the schema accepts any text; only this form is read as a time.
+_DATETIME_WITH_OFFSET = re.compile(r"-?\d{4,}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(Z|[+-]\d\d:\d\d)")
+
+
+def _created(msg: ET.Element) -> datetime | None:
+    """When a RequestMessage says it was created: Header/ReplayDetection/Created."""
+    path = "/".join(q(MESSAGE, n) for n in ("Header", "ReplayDetection", "Created"))
+    text = (msg.findtext(path) or "").strip()
+    if not _DATETIME_WITH_OFFSET.fullmatch(text):
+        return None
+    when = constraints.parse_datetime(text)
+    return when if when is not None and when.tzinfo is not None else None
 
 
 def _trade_date(
@@ -585,6 +607,8 @@ def _verb(root: ET.Element, default: str) -> str:
         return (root.findtext(f"{q(MESSAGE, 'Header')}/{q(MESSAGE, 'Verb')}") or "").strip()
     if root.tag == q(MESSAGE, "ResponseMessage"):
         return "reply"
+    if root.tag in (q(NOTIFICATION, "Notify"), q(EWS, "NotificationMessages")):
+        return "notify"  # notifications ERCOT sent, pushed or fetched; none is a submission
     return default
 
 
@@ -617,8 +641,9 @@ def check(xml: str | bytes, xsd_dir: Path | None = None, *, verb: str = "create"
         _message(rep, root)
     creating = _verb(root, verb) in ("create", "change", "update")
     in_message = root.tag == q(MESSAGE, "RequestMessage")
+    created = _created(root) if in_message else None
     for bidset in root.iter(q(EWS, "BidSet")):
-        _payload_findings(rep, bidset, creating, in_message)
+        _payload_findings(rep, bidset, creating, in_message, created)
     _curve_style(rep, root)
     _hour_24(rep, root)
     _offsets(rep, root)

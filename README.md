@@ -14,11 +14,12 @@ where ERCOT's EWS documentation disagrees with its own schemas.
 
 ERCOT's product schemas make every payload field optional, because one schema serves create, get
 and cancel. A BidSet can pass the XSD and still be rejected, or changed without an error, by the
-market system. The rules that decide this are in ERCOT's prose: the per-product requirement
-tables, the time and precision conventions, and the submission limits. Some of that prose is
-wrong. This tool validates against ERCOT's XSDs, then applies the prose rules, and points a
-failure at a catalogued discrepancy when the entry is about the same element and the same kind of
-error.
+market system. The rules that decide this are in ERCOT's prose. Its EWS pages give the
+per-product requirement tables, the time and precision conventions and the submission limits, and
+some of that documentation is wrong; its Market Submission Validation Rules and Nodal Protocols
+give the price, curve and quantity rules. This tool validates against ERCOT's XSDs, then applies
+the prose rules, and points a failure at a catalogued discrepancy when the entry is about the same
+element and the same kind of error.
 
 ## Quickstart
 
@@ -63,9 +64,9 @@ flowchart TD
     file -- cannot be read --> exit2["exit 2"]
     file --> parse["Parse as untrusted XML"]
     parse --> refused["Not well-formed, a DOCTYPE<br>or nested over 100 levels:<br>one error, nothing else<br>checked, exit 1"]
-    parse --> xsd["Unwrap a SOAP envelope;<br>validate the document and<br>each Payload document<br>against ERCOT's XSDs"]
+    parse --> xsd["Unwrap a SOAP envelope;<br>validate the document and<br>each document it carries<br>against ERCOT's XSDs"]
     xsd --> explain["Explain the first 100 schema<br>errors, each with a fix and,<br>when one matches, a catalogue<br>entry; count the rest"]
-    explain --> prose["Apply ERCOT's prose rules:<br>requirement tables, values,<br>time and DST rules, limits"]
+    explain --> prose["Apply ERCOT's prose rules:<br>requirement tables, values,<br>time and DST rules, limits,<br>prices, curves, quantities"]
     prose --> blocks{"Any error or<br>silent finding?"}
     blocks -- yes --> exit1["BLOCKED: exit 1"]
     blocks -- no --> exit0["OK, or OK with warnings:<br>exit 0 (1 with --strict)"]
@@ -75,14 +76,16 @@ flowchart TD
 
 `check` accepts a bare payload (such as a `BidSet`), a `RequestMessage`, or a SOAP envelope. A
 message's `Payload` is validated on its own, because `Message.xsd` lets it hold any element of
-another namespace unchecked (`xsd:any processContents="skip"`).
+another namespace unchecked (`xsd:any processContents="skip"`). So is the message in a `Notify`,
+which carries a notification ERCOT pushes to a listener: [`docs/notifications.md`](docs/notifications.md)
+lists every notification ERCOT documents and what `check` reports on ERCOT's samples of them.
 
 | Rule | Severity | Finds |
 |---|---|---|
 | `schema` | error | Anything ERCOT's XSDs reject, explained in plain English with a fix; a report lists the first 100 schema errors and counts the rest |
 | `schema-unverified` | warning | The XSDs could not be loaded, so nothing was validated |
 | `missing-required-field` | error | A create without a field the product's table marks Y or K; a warning when ERCOT's own create sample leaves the field out, or for a Three-Part Offer whose curve goes below 0 MW (an Energy Storage Resource's) without `EocFipFop`, which ERCOT's Market Submission Validation Rules call "not applicable to ESRs" |
-| `value-numeric-bound` | error | A value outside the bound in the table's Values column; a warning for COP `hsl` and `lsl` (D033) |
+| `value-numeric-bound` | error | A value outside the bound in the table's Values column; a warning for COP `hsl` and `lsl` (D033) and `hel` and `lel` (D047) |
 | `value-enumerated`, `value-before-trade-date` | warning | Values the table lists, where the table is not a complete rule |
 | `value-ignored` | warning | A field ERCOT documents as "Value ignored if provided"; for an AS Offer's `combinedCycle`, which the Market Submission Validation Rules require for a combined-cycle Resource, the fix is to keep it there |
 | `withdrawn-payload` | error | A payload RTC+B removed (`IncDecOffer`, D010) |
@@ -95,22 +98,42 @@ another namespace unchecked (`xsd:any processContents="skip"`).
 | `curve-style-points` | error | `FIXED` or `VARIABLE` curves with more than one point |
 | `mw-precision` | warning | MW with more than one decimal, which `MWSingleDecimal` does not enforce |
 | `silent-rrs-value1-ignored` | silent | `value1` on an RRS self-arranged quantity, which ERCOT ignores |
+| `price-below-floor` | error | A Three-Part Offer or DAM Energy-Only Offer price below -250.00 per MWh, the floor in ERCOT's Nodal Protocols (§4.4.9.3.1, §4.4.9.5.1, §4.4.9.7.1); an AS Only Offer price below 0 (Market Submission Validation Rules §2.3) |
+| `price-above-cap` | error, or warning | A price above ERCOT's System-Wide Offer Cap: the DASWCAP (at most 5,000) for a Three-Part Offer, DAM Energy-Only Offer or AS Only Offer, the RTSWCAP (2,000) for an RTM Energy Bid (Nodal Protocols §4.4.11; Market Submission Validation Rules §2.3, §3.4). A Three-Part Offer price above the RTSWCAP but not the DASWCAP is an error when the message was created at or after 14:30 CT on the day before the Operating Day, when the RTSWCAP takes over (§4.4.9.3.1), and a warning otherwise |
+| `curve-shape` | error | Energy curve points out of order: an offer price (Three-Part Offer, DAM Energy-Only Offer curve) that falls from one point to the next, a bid price (DAM Energy Bid curve, RTM Energy Bid) that rises, a quantity that falls, or more than two points in a row at one price or one quantity (Nodal Protocols §4.4.9.3.1, §4.4.9.5.1, §4.4.9.6.1, §4.4.9.7.1; for RTM Energy Bids, Market Submission Validation Rules §3.4); for an RTM Energy Bid also a first quantity other than 0 MW, a second of 0 MW or a last below 0.1 MW |
+| `quantity-below-minimum` | error | An AS Only Offer amount below 0.1 MW (Market Submission Validation Rules §2.3); a Three-Part Offer, DAM Energy-Only Offer or DAM Energy Bid curve whose largest quantity is below 1 MW (Nodal Protocols §4.4.9.3.1, §4.4.9.5.1, §4.4.9.6.1), except a curve that goes below 0 MW, which is an Energy Storage Resource's |
+| `as-only-offer-type` | error | An AS Only Offer whose `asType` is an XSD value other than `Reg-Up`, `Reg-Down`, `Non-Spin`, `RRSPF` or `ECRSS`, the five products the Market Submission Validation Rules allow (§2.3, as REGUP, REGDN, ONNS, RRSPF and ECRSS); a value outside the XSD's list is a `schema` error |
+| `cop-soc-order` | error | A COP `Limits` element whose `minSOC` is above its `targetBeginSOC`, or whose `targetBeginSOC` is above its `maxSOC`; the Market Submission Validation Rules (§4.1) say ERCOT rejects the COP |
 | `cancel-every-hour`, `cop-cancel` | warning, error | A cancel mRID without an hour suffix; a COP cancel |
 | `payload-too-large` | error | A BidSet of 3,000,000 bytes or more before compression; ERCOT's limit is "less than 3 Mb in size(Pre-compression)", which this tool reads as 3,000,000 bytes |
 | `doctype` | error | A document type declaration (`<!DOCTYPE ...>`); ERCOT's MarkeTrak Developer Guide lists among SOAP's syntax rules "A SOAP message must NOT contain a DTD reference", which the EWS pages do not state; nothing else is checked |
 | `nesting-depth` | error | Elements nested more than 100 levels deep, far deeper than ERCOT's schemas declare; a limit of this tool, not a rule ERCOT states; nothing else is checked |
 
-Every rule other than `schema`, `schema-unverified` and `nesting-depth` names the ERCOT page it
-comes from (`source` in the JSON report). "Silent" means ERCOT accepts the document and may alter
-or ignore part of it. A clean report means these checks found nothing against the vendored schema
-release; it does not predict acceptance, which also depends on credit and on validation ERCOT runs
-after receipt.
+Every rule other than `schema`, `schema-unverified` and `nesting-depth` names the ERCOT page or
+document it comes from (`source` in the JSON report). "Silent" means ERCOT accepts the document and
+may alter or ignore part of it. A clean report means these checks found nothing against the vendored
+schema release; it does not predict acceptance, which also depends on credit and on validation ERCOT
+runs after receipt.
 
-ERCOT states more submission rules outside its EWS documentation, in the MMS Market Submission
+[docs/bidding-path.md](docs/bidding-path.md) draws what happens after receipt, with a security note.
+
+ERCOT states more submission rules outside its EWS documentation: in its MMS Market Submission
 Validation Rules ([NP4-450-M](https://www.ercot.com/mp/data-products/data-product-details?id=NP4-450-M),
-version 3.2): the shape of offer and bid curves, minimum quantities, limits on bid counts and
-submission windows. This tool does not apply those rules yet. It cites that document only where it
-changes a finding: FIP and FOP on an Energy Storage Resource's offer, and the combined-cycle plant
+version 3.2, posted 13 February 2026) and in Section 4 of its
+[Nodal Protocols](https://www.ercot.com/mktrules/nprotocols/current) (the version effective
+1 August 2026). From these this tool applies price floors and the System-Wide Offer Caps, the order
+of the points on an energy curve, the minimum quantities of energy curves and AS Only Offers, the
+order of a COP's state of charge, and the products an AS Only Offer may carry. The caps are values
+ERCOT's Board changes. The checks use the ones in the Protocols version of 1 August 2026: an RTSWCAP
+of 2,000, and a DASWCAP of 5,000 that falls to 2,000 during an Emergency Pricing Program or once
+the Peaker Net Margin threshold is passed, which a document cannot show; every message says where
+its cap comes from. A Three-Part Offer price between the two caps is allowed only before 14:30 CT
+on the day before the Operating Day; a RequestMessage's `Header/ReplayDetection/Created` is the
+only time a submission carries, so without one that case is a warning. Not applied: rules that need
+ERCOT's own data (registration, Resource-specific floors and caps, credit, the AS obligation,
+published lists of Settlement Points), the submission windows, limits on how many bids and offers
+a QSE sends in a day, and multi-hour block rules. The tool also cites NP4-450-M where it changes
+another finding: FIP and FOP on an Energy Storage Resource's offer, and the combined-cycle plant
 name on an AS Offer.
 
 `check` and `explain` treat every document as untrusted. A document with a DOCTYPE is refused, so
@@ -148,13 +171,13 @@ block and the script disagree.
 <!-- measure:start -->
 ```
 Sources: ercot/api-specs 7e785be, retrieved 2026-10-07
-Catalogue: 34 discrepancies (26 schema-wins, 3 prose-wins, 3 neither, 2 prose-stale); 66 of 66 probes still match; 29 with a reproducer; 8 reported upstream
-Portal samples: 178 distinct XML blocks on EWS pages; 98 complete documents, of which 12 fail ERCOT's own XSDs
+Catalogue: 47 discrepancies (36 schema-wins, 6 neither, 3 prose-wins, 2 prose-stale); 95 of 95 probes still match; 39 with a reproducer; 8 reported upstream
+Portal samples: 178 distinct XML blocks on EWS pages; 98 complete documents, of which 14 fail ERCOT's own XSDs
 api-specs ews/examples: 2 of 3 fail ERCOT's own XSDs (ASOnlyOffer-Example.xml, GenResParams-SOC-Example.xml)
 XSD constraints extracted: 1057 (463 required, 233 enumeration, 179 order, 151 cardinality, 12 bound, 11 length, 8 pattern)
 Requirement tables: 487 element rows on 29 portal pages; 134 value rules parsed, 74 stated rules left unparsed
-Mutants of the 6 files in examples/: 58 break an XSD constraint (XSD catches 58, this tool's rules 7); 134 each break one of this tool's prose rules (the rule it targets catches 134, 113 of them pass the XSD; 0 survive)
-Prose-rule mutants by rule: 51 required-field, 38 hour-boundary, 19 hour-24, 6 mw-precision, 6 trade-date, 6 utc-offset, 4 overlap, 2 numeric-bound, 1 curve-style, 1 rrs-value1
+Mutants of the 6 files in examples/: 58 break an XSD constraint (XSD catches 58, this tool's rules 7); 147 each break one of this tool's prose rules (the rule it targets catches 147, 126 of them pass the XSD; 0 survive)
+Prose-rule mutants by rule: 51 required-field, 38 hour-boundary, 19 hour-24, 6 mw-precision, 6 trade-date, 6 utc-offset, 4 min-quantity, 4 overlap, 3 price-cap, 3 price-floor, 2 as-only-type, 2 numeric-bound, 1 curve-shape, 1 curve-style, 1 rrs-value1
 ```
 <!-- measure:end -->
 
@@ -162,7 +185,8 @@ The mutation test (`ercot-ews-check mutate FILE`) breaks a valid document one ru
 Every prose-rule mutant targets a rule this tool implements and counts as caught only when that
 rule fires, so the figure measures enforcement, not coverage of ERCOT's prose. The required-field
 and bound mutants are generated from the same extracted tables the checker reads; the 74 unparsed
-rules are the extraction's known gap.
+rules are the extraction's known gap. The price, curve, quantity and AS-product mutants use the
+values the checker's market rules hold.
 
 `ercot-ews-check examples --invalid` lists the failing portal samples, and `ercot-ews-check rules`
 prints every extracted XSD constraint with its `file:line`.
@@ -193,7 +217,7 @@ working on this repository.
 ## Vendored ERCOT files
 
 `vendor/ercot/` holds ERCOT's EWS folder from [ercot/api-specs](https://github.com/ercot/api-specs)
-at a pinned commit, and the developer portal's search index and two diagrams, each byte-identical
+at a pinned commit, and the developer portal's search index and twelve diagrams, each byte-identical
 to its source. `vendor/ERCOT-TERMS-OF-USE.txt` is the text of ERCOT's Website User Agreement,
 extracted from the page by `scripts/fetch_vendor.py`. `vendor/MANIFEST.json` records each file's
 source, retrieval date and sha256.

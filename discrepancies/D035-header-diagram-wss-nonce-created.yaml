@@ -1,0 +1,70 @@
+id: D035
+slug: header-diagram-wss-nonce-created
+title: The Message Header diagram draws ReplayDetection's children as wsse:Nonce and wsu:Created; the
+  schema declares Nonce and Created in the message namespace
+kind: namespace
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Services Organization
+  location: diagram (Message_Header_Structure.png), Message Header
+  quote: msg:ReplayDetection ... wsse:Nonce ... wsu:Created
+  observed: The header's named children carry the msg prefix. ReplayDetection's two children are drawn as
+    wsse:Nonce and wsu:Created, in that order, which are the WS-Security elements' names, and the caption
+    under wsu:Created is the WS-Security utility schema's own description of that element.
+  url: https://developer.ercot.com/applications/ews/Services%20Organization/#message-header
+schema_says:
+  file: Message.xsd
+  line: 66
+  rule: ReplayDetectionType declares Nonce and Created locally (name=, not ref=), typed wsse:EncodedString
+    and wsu:AttributedDateTime. Message.xsd is elementFormDefault qualified, so both elements are in the
+    message namespace; wsse:Nonce and wsu:Created are different elements.
+do: Write Nonce and then Created in the message namespace, like the header's other children. Only their
+  types come from WS-Security.
+lookup:
+  messages:
+  - RequestMessage
+  - ResponseMessage
+  elements:
+  - ReplayDetection
+  - Nonce
+  - Created
+  endpoints:
+  - Market Transaction Service
+  - Market Information Service
+reproducer:
+  invalid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <wsse:Nonce xmlns:wsse="http://www.docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</wsse:Nonce>
+          <wsu:Created xmlns:wsu="http://www.docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2026-10-14T09:00:00-05:00</wsu:Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+  valid: |
+    <RequestMessage xmlns="http://www.ercot.com/schema/2007-06/nodal/ews/message">
+      <Header>
+        <Verb>get</Verb>
+        <Noun>BidSet</Noun>
+        <ReplayDetection>
+          <Nonce>8d3f1c2e-1b6a-4f0e-9c1d-2a7b5e9f0c31</Nonce>
+          <Created>2026-10-14T09:00:00-05:00</Created>
+        </ReplayDetection>
+        <Revision>1</Revision>
+        <Source>QSE1</Source>
+      </Header>
+    </RequestMessage>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/Message_Header_Structure.png
+    sha256: 31a23cff189cd2f039017f931b1fbf774c6481c2ed62f943729f851b18580c68
+  schema:
+    file: Message.xsd
+    pattern: <xsd:element name="Nonce" type="wsse:EncodedString"/>
+notes: The reproducer binds wsse and wsu to the namespaces Message.xsd imports. D014 records the same two
+  namespaces, in the reverse order, in Appendix D's annotated message.

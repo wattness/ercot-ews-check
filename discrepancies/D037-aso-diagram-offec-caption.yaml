@@ -1,0 +1,43 @@
+id: D037
+slug: aso-diagram-offec-caption
+title: The ASO page's price-curve diagram captions OFFEC 'Offline Non-Spin price', as it does OFFNS; the
+  schema documents OFFEC as the Offline ECRS price
+kind: annotation
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / Ancillary Service Offer (ASO)
+  location: diagram (PriceCurves_Using_ASPriceCurve.jpg)
+  quote: OFFNS ... Offline Non-Spin price ... OFFEC ... Offline Non-Spin price
+  observed: Under OffLineNonSpin, OFFEC carries the same caption as OFFNS, and the drawn sequence is
+    xvalue, OFFNS, OFFEC, block, with no ECRS. The ASPriceCurve diagram on the Ancillary Service Awards
+    and AwardedAS pages captions OFFEC 'Offline ECRS price' and draws ECRS after it.
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Ancillary%20Service%20Offer%20%28ASO%29/
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 662
+  rule: In OffLineNonSpin, OFFNS is documented 'Offline Non-Spin price' and OFFEC 'Offline ECRS price', an
+    NPRR863 Phase 2 (ECRS) element used in ASOffer submissions. An optional ECRS element, used in awards,
+    follows OFFEC.
+do: Put the Offline Non-Spin price in OFFNS and the Offline ECRS price in OFFEC; OFFEC is not a second
+  Non-Spin price. Expect ECRS inside OffLineNonSpin when reading awards.
+lookup:
+  products:
+  - ASOffer
+  messages:
+  - BidSet
+  elements:
+  - OffLineNonSpin
+  - OFFNS
+  - OFFEC
+  endpoints:
+  - Market Transaction Service
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/PriceCurves_Using_ASPriceCurve.jpg
+    sha256: b8c19c1674f1f860b000c399061e3254f7de5e0caac627716227f1c0f2db3baf
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:documentation>Offline ECRS price</xs:documentation>
+notes: The page's table names OFFEC without saying what it prices, so the diagram's caption is the page's
+  only description of it. No document can show the caption error, so there is no reproducer.

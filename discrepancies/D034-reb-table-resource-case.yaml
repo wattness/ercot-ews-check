@@ -21,7 +21,6 @@ lookup:
   messages:
   - BidSet
   elements:
-  - resource
   - Resource
   endpoints:
   - Market Transaction Service

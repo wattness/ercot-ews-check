@@ -1,0 +1,55 @@
+id: D043
+slug: solar-analogvalue-diagram-float
+title: The Solar Generation Forecast diagram gives AnalogValue the base type xs:float; the schema's base
+  type is xs:decimal
+kind: value-format
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Notifications Messages / Solar Generation Forecast
+  location: diagram (Solar_Forecast_AnalogValue_Structure.jpeg)
+  quote: Base Type xs:float
+  observed: The AnalogValue node gives its base type as xs:float, and the base-type box carries the
+    description of xs:float as an IEEE single-precision floating point type. The page's table describes
+    the value as a valid floating point value.
+  url: https://developer.ercot.com/applications/ews/Notifications%20Messages/Solar%20Generation%20Forecast/
+schema_says:
+  file: ErcotSolarQSEForecast.xsd
+  line: 76
+  rule: AnalogValue is simple content extending xs:decimal, as in ErcotForecast.xsd (line 78). xs:decimal
+    has no exponent form, INF or NaN; xs:float has all three.
+do: Write AnalogValue as a plain decimal such as 4.4. When reading, also accept the float forms ERCOT's
+  samples use (D024).
+lookup:
+  messages:
+  - ForecastSolarPayload
+  elements:
+  - AnalogValue
+  endpoints:
+  - Notifications
+reproducer:
+  invalid: |
+    <ForecastSolarPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site name="SITE1" qseid="QSE1">SITE1</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue timeStamp="2026-10-15T10:00:00-05:00" type="STPPF" units="MW" statistic="MEAN">4.4E0</AnalogValue>
+      </ForecastSet>
+    </ForecastSolarPayload>
+  valid: |
+    <ForecastSolarPayload xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <ForecastSet>
+        <Site name="SITE1" qseid="QSE1">SITE1</Site>
+        <Created>2026-10-15T09:00:00-05:00</Created>
+        <AnalogValue timeStamp="2026-10-15T10:00:00-05:00" type="STPPF" units="MW" statistic="MEAN">4.4</AnalogValue>
+      </ForecastSet>
+    </ForecastSolarPayload>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/Solar_Forecast_AnalogValue_Structure.jpeg
+    sha256: 367613f14a165d3d58ff6080ddd544a445962ba98821653b6419f1b0c2c5f7a5
+  schema:
+    file: ErcotSolarQSEForecast.xsd
+    pattern: <xs:extension base="xs:decimal">
+notes: D024 records ERCOT's forecast samples writing values such as 1.6E0, a form xs:float allows and
+  xs:decimal does not.

@@ -9,8 +9,11 @@ Two families of mutants, reported separately:
   in prose: a field the tables mark required, a bound or hour boundary from the
   Values column, 24:00, overlapping intervals, a wrong trading date, the wrong
   number of points for a curveStyle, MW with more than one decimal, an offset
-  that is not Central time, value1 on an RRS self-arranged quantity. A rule
-  mutant counts as caught only by the rule it targets (``TARGET``).
+  that is not Central time, value1 on an RRS self-arranged quantity, and, from
+  ERCOT's market documents, an offer price below the floor or above the cap,
+  curve points out of order, a quantity below the minimum, a COP state of charge
+  out of order and an AS Only Offer for another product. A rule mutant counts as
+  caught only by the rule it targets (``TARGET``).
 
 Every rule mutant targets a rule this tool implements, and the required-field and
 bound mutants come from the same extracted tables the checker reads, so they
@@ -25,8 +28,10 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import timedelta, timezone
+from decimal import Decimal
+from itertools import pairwise
 
-from ercot_ews_check import checker, constraints, requirements, schema, sources
+from ercot_ews_check import checker, constraints, market_rules, requirements, schema, sources
 from ercot_ews_check.namespaces import EWS, local, q
 from ercot_ews_check.xsd_rules import Rule
 
@@ -43,6 +48,12 @@ TARGET = {
     "rrs-value1": "silent-rrs-value1-ignored",
     "curve-style": "curve-style-points",
     "mw-precision": "mw-precision",
+    "price-floor": "price-below-floor",
+    "price-cap": "price-above-cap",
+    "curve-shape": "curve-shape",
+    "soc-order": "cop-soc-order",
+    "min-quantity": "quantity-below-minimum",
+    "as-only-type": "as-only-offer-type",
 }
 
 
@@ -344,7 +355,117 @@ def rule_mutants(xml: str) -> list[Mutant]:
                     Mutant("rule", "mw-precision", f"{local(el.tag)} = {e2.text}", _tostring(tree))
                 )
                 break
+
+    out += _market_mutants(base, root)
     return _dedupe(out)
+
+
+# Payload -> (curve element, price floor or None, price cap) from market_rules.
+PRICE_BOUNDS = {
+    "ThreePartOffer": ("EnergyOfferCurve", market_rules.ENERGY_FLOOR, market_rules.DASWCAP),
+    "EnergyOnlyOffer": ("EnergyOfferCurve", market_rules.ENERGY_FLOOR, market_rules.DASWCAP),
+    "RTMEnergyBid": ("PriceCurve", None, market_rules.RTSWCAP),
+    "ASOnlyOffer": ("ASOnlyPriceCurve", Decimal("0"), market_rules.DASWCAP),
+}
+# Payload -> (curve element, a quantity below its minimum).
+MIN_QUANTITY = {
+    "ThreePartOffer": ("EnergyOfferCurve", "0.5"),
+    "EnergyOnlyOffer": ("EnergyOfferCurve", "0.5"),
+    "EnergyBid": ("PriceCurve", "0.5"),
+    "ASOnlyOffer": ("ASOnlyPriceCurve", "0.0"),
+}
+
+
+def _shape_mutant(base: ET.Element, tag: str, payload: ET.Element) -> Mutant | None:
+    """Swap the quantities of the first two points that differ, so the quantity falls."""
+    for curve in payload.findall(q(EWS, market_rules.CURVE_TAG[tag])):
+        style = (curve.findtext(q(EWS, "curveStyle")) or "").strip()
+        if tag in ("EnergyOnlyOffer", "EnergyBid") and style not in ("", "CURVE"):
+            continue
+        xs = curve.findall(f"{q(EWS, 'CurveData')}/{q(EWS, 'xvalue')}")
+        for a, b in pairwise(xs):
+            if market_rules.number(a.text) != market_rules.number(b.text):
+                tree, a2 = _clone_at(base, a)
+                b2 = list(tree.iter())[_nth(base, b)]
+                a2.text, b2.text = b.text, a.text
+                return Mutant("rule", "curve-shape", f"{tag} quantities swapped", _tostring(tree))
+    return None
+
+
+def _soc_mutants(base: ET.Element, cop: ET.Element) -> list[Mutant]:
+    """Raise targetBeginSOC above maxSOC in the first Limits element that carries both."""
+    for limits in cop.findall(q(EWS, "Limits")):
+        plan, high = limits.find(q(EWS, "targetBeginSOC")), limits.find(q(EWS, "maxSOC"))
+        top = market_rules.number(high.text) if high is not None else None
+        if plan is None or top is None:
+            continue
+        tree, p2 = _clone_at(base, plan)
+        p2.text = f"{top + 1:.1f}"
+        return [Mutant("rule", "soc-order", f"COP targetBeginSOC = {p2.text}", _tostring(tree))]
+    return []
+
+
+def _min_quantity_mutants(base: ET.Element, tag: str, payload: ET.Element) -> list[Mutant]:
+    """Set every quantity of an energy curve below 1 MW, or one AS Only amount to 0 MW."""
+    curve_tag, low = MIN_QUANTITY[tag]
+    curve = payload.find(q(EWS, curve_tag))
+    if curve is None or (tag == "ThreePartOffer" and market_rules.below_zero(payload)):
+        return []
+    xs = curve.findall(f"{q(EWS, 'CurveData')}/{q(EWS, 'xvalue')}")
+    if not xs:
+        return []
+    tree, _ = _clone_at(base, curve)
+    nodes = list(tree.iter())
+    for x in xs if tag != "ASOnlyOffer" else xs[:1]:
+        nodes[_nth(base, x)].text = low
+    return [Mutant("rule", "min-quantity", f"{tag} quantity = {low}", _tostring(tree))]
+
+
+def _market_mutants(base: ET.Element, root: ET.Element) -> list[Mutant]:
+    """Mutants for the rules from ERCOT's market documents, one of each kind per payload."""
+    out: list[Mutant] = []
+    for bidset in root.iter(q(EWS, "BidSet")):
+        for payload in bidset:
+            tag = local(payload.tag)
+            if tag == "COP":
+                out += _soc_mutants(base, payload)
+            if tag in market_rules.CURVE_TAG:
+                mutant = _shape_mutant(base, tag, payload)
+                if mutant is not None:
+                    out.append(mutant)
+            if tag in MIN_QUANTITY:
+                out += _min_quantity_mutants(base, tag, payload)
+            as_type = payload.find(q(EWS, "asType"))
+            if tag == "ASOnlyOffer" and as_type is not None:
+                tree, a2 = _clone_at(base, as_type)
+                a2.text = "RRSUF"  # an ASType value, but not an AS Only Offer product
+                out.append(
+                    Mutant("rule", "as-only-type", "ASOnlyOffer asType = RRSUF", _tostring(tree))
+                )
+            if tag not in PRICE_BOUNDS:
+                continue
+            curve_tag, floor, cap = PRICE_BOUNDS[tag]
+            curve = payload.find(q(EWS, curve_tag))
+            prices = (
+                [] if curve is None else curve.findall(f"{q(EWS, 'CurveData')}/{q(EWS, 'y1value')}")
+            )
+            priced = [(market_rules.number(p.text), p) for p in prices]
+            priced = [(v, p) for v, p in priced if v is not None]
+            if not priced:
+                continue
+            # Raise the highest price and lower the lowest, so the curve keeps its order.
+            _, top = max(priced, key=lambda vp: vp[0])
+            tree, e2 = _clone_at(base, top)
+            e2.text = f"{cap + 1:.2f}"
+            out.append(Mutant("rule", "price-cap", f"{tag} price = {e2.text}", _tostring(tree)))
+            if floor is not None:
+                _, bottom = min(priced, key=lambda vp: vp[0])
+                tree, e2 = _clone_at(base, bottom)
+                e2.text = f"{floor - 1:.2f}"
+                out.append(
+                    Mutant("rule", "price-floor", f"{tag} price = {e2.text}", _tostring(tree))
+                )
+    return out
 
 
 def _path(el: ET.Element, top: ET.Element, parents: dict) -> str:

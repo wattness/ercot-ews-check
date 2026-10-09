@@ -1,7 +1,7 @@
 id: D015
 slug: header-verb-capitalised
-title: Several request tables give Header/Verb capitalised (Get, Change, Cancel, Reply, Created); the
-  enumeration is lower case
+title: Several request and notification tables give Header/Verb capitalised (Get, Change, Cancel, Reply,
+  Created); the enumeration is lower case
 kind: enumeration-value
 resolution: schema-wins
 status: open

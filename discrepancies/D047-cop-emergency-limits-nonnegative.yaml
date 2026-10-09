@@ -1,0 +1,48 @@
+id: D047
+slug: cop-emergency-limits-nonnegative
+title: COP table gives hel and lel >= 0, describing lel as a low sustained limit; the Protocols set no
+  sign for the emergency limits and let an ESR's sustained limits go below zero
+kind: value-bound
+resolution: neither
+status: open
+ercot_says:
+  page: Market Transaction Messages / Current Operating Plan (COP)
+  location: Message Element table
+  quote: Limits/hel Y float High emergency limit in MW >=0 Limits/lel Y float Low sustained limit in MW
+    >=0
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Current%20Operating%20Plan%20%28COP%29/
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 171
+  rule: hel and lel are MWSingleDecimal, a plain xs:decimal; negative values validate.
+protocols_say:
+  section: Nodal Protocols 2.1, definitions of Low Emergency Limit (LEL) and of Low Sustained Limit (LSL)
+    for an Energy Storage Resource (ESR); 3.9.1(5)(c) to (f). Version of 1 August 2026.
+  quote: The limit established by the QSE describing the minimum temporary unsustainable energy production
+    capability of a Resource ... A negative LSL for an ESR describes the maximum sustained energy charging
+    capability of the ESR.
+  url: https://www.ercot.com/mktrules/nprotocols/current
+do: Neither source settles whether ERCOT accepts a negative HEL or LEL for an Energy Storage Resource.
+  The checker reports a negative COP hel or lel as a warning, not an error.
+lookup:
+  products:
+  - COP
+  messages:
+  - BidSet
+  elements:
+  - Limits
+  - hel
+  - lel
+  values:
+  - ESR
+  endpoints:
+  - Market Transaction Service
+probes:
+  portal:
+    page: Current%20Operating%20Plan%20%28COP%29
+    text: Limits/lel Y float Low sustained limit in MW >=0
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:element name="lel" type="MWSingleDecimal"/>
+notes: The lel row repeats the lsl row's description, 'Low sustained limit in MW'. D033 covers hsl and lsl,
+  which the Protocols say may be negative for an ESR. No ERCOT sample shows a negative COP limit.

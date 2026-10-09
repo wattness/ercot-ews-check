@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ercot-ews-check"
-version = "0.1.0"
+version = "0.2.0"
 description = "Check ERCOT EWS submissions against ERCOT's schemas and published rules, and look up known discrepancies in ERCOT's EWS documentation. Unofficial; not affiliated with or endorsed by ERCOT."
 readme = "README.md"
 license = "Apache-2.0"

@@ -22,7 +22,7 @@ ERCOT
 Files:
   ercot/api-specs/ews/        the ews/ folder of https://github.com/ercot/api-specs
                               at the commit pinned in MANIFEST.json
-  ercot/developer.ercot.com/  the developer portal's search index and two
+  ercot/developer.ercot.com/  the developer portal's search index and twelve
                               diagrams from https://developer.ercot.com/
   ERCOT-TERMS-OF-USE.txt      ERCOT's Website User Agreement
 

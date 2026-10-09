@@ -287,6 +287,76 @@
       "sha256": "4acc29d33f69596796ed8ce80e4f7d830a1021b235d301f15cd6620dd37409b3"
     },
     {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/Message_Header_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/Message_Header_Structure.png",
+      "retrieved": "2026-10-09",
+      "bytes": 56609,
+      "sha256": "31a23cff189cd2f039017f931b1fbf774c6481c2ed62f943729f851b18580c68"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/COP_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/COP_Structure.png",
+      "retrieved": "2026-10-09",
+      "bytes": 9059,
+      "sha256": "71a40664f43616c8ff0780e29299143bcf22b0f28d19071fba8639a44d460fb3"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/PriceCurves_Using_ASPriceCurve.jpg",
+      "url": "https://developer.ercot.com/applications/ews/Images/PriceCurves_Using_ASPriceCurve.jpg",
+      "retrieved": "2026-10-09",
+      "bytes": 259945,
+      "sha256": "b8c19c1674f1f860b000c399061e3254f7de5e0caac627716227f1c0f2db3baf"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/AwardedEnergyOnlyOffer_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/AwardedEnergyOnlyOffer_Structure.png",
+      "retrieved": "2026-10-09",
+      "bytes": 6188,
+      "sha256": "413352cc60dabf6a750542c011fd52cb14d28f9776f3cc8888a0be344a7662d7"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/TotalLoad_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/TotalLoad_Structure.png",
+      "retrieved": "2026-10-09",
+      "bytes": 7915,
+      "sha256": "4baf813cd780b56df04ae5991f1c39f131f904d8e20d7ee0388021227af8106e"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/RT15MinPriceAdder.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/RT15MinPriceAdder.png",
+      "retrieved": "2026-10-09",
+      "bytes": 17268,
+      "sha256": "5e8d1fd91fa6ba081516cd553dacb39596282970472e69887fcff863dd86fd20"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/RTDIndicativePriceAdders.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/RTDIndicativePriceAdders.png",
+      "retrieved": "2026-10-09",
+      "bytes": 2688,
+      "sha256": "a01b98c4f08ce8a0a1cfd374f05292f033a01465bb57a6e5957fd30c88c411a9"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/LoadRatioShare_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/LoadRatioShare_Structure.png",
+      "retrieved": "2026-10-09",
+      "bytes": 8990,
+      "sha256": "f0e8c1d5de0af5311b7e55cb96f8503dd651cac5bbc5cde2f5149f91497b9631"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/Solar_Forecast_AnalogValue_Structure.jpeg",
+      "url": "https://developer.ercot.com/applications/ews/Images/Solar_Forecast_AnalogValue_Structure.jpeg",
+      "retrieved": "2026-10-09",
+      "bytes": 101845,
+      "sha256": "367613f14a165d3d58ff6080ddd544a445962ba98821653b6419f1b0c2c5f7a5"
+    },
+    {
+      "path": "ercot/developer.ercot.com/applications/ews/Images/RTMPriceCorrectionSOGPRICE_Structure.png",
+      "url": "https://developer.ercot.com/applications/ews/Images/RTMPriceCorrectionSOGPRICE_Structure.png",
+      "retrieved": "2026-10-09",
+      "bytes": 35699,
+      "sha256": "18179c6d880f7da025d7f25fc633d739392c0ca70e67002ab948af69d74c4478"
+    },
+    {
       "path": "ERCOT-TERMS-OF-USE.txt",
       "url": "https://www.ercot.com/help/terms",
       "extract": "terms-text",

@@ -1,0 +1,66 @@
+id: D040
+slug: rt15min-adder-diagram-rtrdpecr
+title: The RT15MinPriceAdder diagram names RTRDPECR; the schema, the page's element list and its example
+  have RTRDPECRS
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Information Messages / RT 15-Minute Price Adders
+  location: diagram (RT15MinPriceAdder.png)
+  quote: RTRDPRRS ... RTRDPECR ... RTRDPNS
+  observed: RT15MinPriceAdder is drawn with ten children; the eighth is labelled RTRDPECR. The page's list
+    of elements and its XML example use RTRDPECRS.
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/RT%2015-Minute%20Price%20Adders/
+schema_says:
+  file: ErcotInformationTypes.xsd
+  line: 339
+  rule: RT15MinPriceAdder declares RTRDPECRS (xs:decimal, required) between RTRDPRRS and RTRDPNS. No
+    schema declares RTRDPECR.
+do: Read RTRDPECRS.
+lookup:
+  messages:
+  - RT15MinPriceAdders
+  elements:
+  - RTRDPECR
+  - RTRDPECRS
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <RT15MinPriceAdders xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <RT15MinPriceAdder>
+        <DeliveryDate>10/15/2026</DeliveryDate>
+        <DeliveryHour>17</DeliveryHour>
+        <DeliveryInterval>4</DeliveryInterval>
+        <RTRDPA>0.0</RTRDPA>
+        <RTRDPRU>0.0</RTRDPRU>
+        <RTRDPRD>0.0</RTRDPRD>
+        <RTRDPRRS>0.0</RTRDPRRS>
+        <RTRDPECR>0.0</RTRDPECR>
+        <RTRDPNS>0.0</RTRDPNS>
+        <RepeatedHourFlag>N</RepeatedHourFlag>
+      </RT15MinPriceAdder>
+    </RT15MinPriceAdders>
+  valid: |
+    <RT15MinPriceAdders xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <RT15MinPriceAdder>
+        <DeliveryDate>10/15/2026</DeliveryDate>
+        <DeliveryHour>17</DeliveryHour>
+        <DeliveryInterval>4</DeliveryInterval>
+        <RTRDPA>0.0</RTRDPA>
+        <RTRDPRU>0.0</RTRDPRU>
+        <RTRDPRD>0.0</RTRDPRD>
+        <RTRDPRRS>0.0</RTRDPRRS>
+        <RTRDPECRS>0.0</RTRDPECRS>
+        <RTRDPNS>0.0</RTRDPNS>
+        <RepeatedHourFlag>N</RepeatedHourFlag>
+      </RT15MinPriceAdder>
+    </RT15MinPriceAdders>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/RT15MinPriceAdder.png
+    sha256: 5e8d1fd91fa6ba081516cd553dacb39596282970472e69887fcff863dd86fd20
+  schema:
+    file: ErcotInformationTypes.xsd
+    pattern: <xs:element name="RTRDPECRS" type="xs:decimal"/>

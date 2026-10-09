@@ -11,6 +11,7 @@ pytest                                   # offline: sockets refused, subprocess 
 ruff check . && ruff format --check .
 python scripts/check_boundaries.py       # imports: stdlib, xmlschema, yaml, pytest only
 python scripts/build_index.py --check    # docs/discrepancies.md matches the YAML
+python scripts/build_notifications.py --check   # docs/notifications.md matches the vendored files
 ```
 
 ## Layout
@@ -19,9 +20,15 @@ python scripts/build_index.py --check    # docs/discrepancies.md matches the YAM
   `explain.py`) then the prose rules.
 - `src/ercot_ews_check/requirements.py`, `constraints.py`: requirement tables and Values-column
   rules, extracted at run time from `vendor/ercot/developer.ercot.com/search/search_index.json`.
+- `src/ercot_ews_check/market_rules.py`: price, curve-shape, minimum-quantity, COP
+  state-of-charge and AS Only Offer rules from ERCOT's Market Submission Validation Rules
+  (NP4-450-M) and Nodal Protocols Section 4, which the EWS pages do not state. The offer caps are
+  dated values; each message names the Protocols version they come from.
 - `src/ercot_ews_check/discrepancies.py`: loads `discrepancies/*.yaml`, runs probes, renders the
   index.
 - `src/ercot_ews_check/mutate.py`: mutation testing; `scripts/measure.py` prints the README figures.
+- `src/ercot_ews_check/notifications.py`: the notifications ERCOT documents, read from the vendored
+  portal and schemas; `scripts/build_notifications.py` writes them into `docs/notifications.md`.
 - `vendor/ercot/`: ERCOT's files, byte-identical to their sources, hashed in `vendor/MANIFEST.json`.
 
 ## Rules

@@ -1,0 +1,84 @@
+id: D038
+slug: eoo-award-diagram-is-energy-offer-award
+title: The Energy-Only Offer award pages show the AwardedEnergyOffer diagram (resource, startType,
+  combinedCycleName); AwardedEnergyOnlyOffer holds awardedMWh, spp, bidId and sp
+kind: element-path
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Information Messages / AwardedEnergyOnlyOffer; Notifications Messages / DAM Energy-Only
+    Offer Awards
+  location: diagram (AwardedEnergyOnlyOffer_Structure.png)
+  quote: AwardedEnergyOffer ... EnergyAward Offer ... resource ... awardedMWh ... startType ...
+    combinedCycleName
+  observed: Both pages present this image as the AwardedEnergyOnlyOffer structure. Its root is labelled
+    AwardedEnergyOffer, and after the Award fields it draws resource, awardedMWh, startType and
+    combinedCycleName, with no spp, bidId or sp. The Market Information page's own table and XML example
+    list awardedMWh, spp, bidId and sp.
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/AwardedEnergyOnlyOffer/
+schema_says:
+  file: ErcotAwardTypes.xsd
+  line: 180
+  rule: AwardedEnergyOnlyOffer extends Award with awardedMWh, spp (optional), bidId and sp. resource,
+    startType and combinedCycleName belong to AwardedEnergyOffer (line 108), the Energy Offer award.
+do: Read an Energy-Only Offer award as the Award fields followed by awardedMWh, spp, bidId and sp; expect
+  no resource, startType or combinedCycleName.
+lookup:
+  products:
+  - EnergyOnlyOffer
+  messages:
+  - AwardSet
+  elements:
+  - AwardedEnergyOnlyOffer
+  - resource
+  - startType
+  - combinedCycleName
+  endpoints:
+  - Market Information Service
+  - Notifications
+reproducer:
+  invalid: |
+    <AwardSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <marketType>DAM</marketType>
+      <AwardedEnergyOnlyOffer>
+        <qse>QSE1</qse>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-15T01:00:00-05:00</endTime>
+        <tradingDate>2026-10-15</tradingDate>
+        <marketType>DAM</marketType>
+        <resource>RESOURCE1</resource>
+        <awardedMWh>3.0</awardedMWh>
+        <startType>HOT</startType>
+      </AwardedEnergyOnlyOffer>
+    </AwardSet>
+  valid: |
+    <AwardSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <marketType>DAM</marketType>
+      <AwardedEnergyOnlyOffer>
+        <qse>QSE1</qse>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-15T01:00:00-05:00</endTime>
+        <tradingDate>2026-10-15</tradingDate>
+        <marketType>DAM</marketType>
+        <awardedMWh>3.0</awardedMWh>
+        <spp>34.00</spp>
+        <bidId>eoo01</bidId>
+        <sp>HB_HOUSTON</sp>
+      </AwardedEnergyOnlyOffer>
+    </AwardSet>
+probes:
+  portal:
+    page: Market%20Information%20Messages/AwardedEnergyOnlyOffer
+    text: An AwardedEnergyOnlyOffer is returned in the payload of the ResponseMessage using the following
+      structure
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/AwardedEnergyOnlyOffer_Structure.png
+    sha256: 413352cc60dabf6a750542c011fd52cb14d28f9776f3cc8888a0be344a7662d7
+  schema:
+    file: ErcotAwardTypes.xsd
+    pattern: <xs:complexType name="AwardedEnergyOnlyOffer">
+notes: The Energy Offer award pages' own diagram (AwardedEnergyOffer_Structure.png) draws the same
+  structure. AwardedEnergyOnlyOffer's fields are the same as AwardedEnergyBid's, which the DAM Energy Bid
+  award diagram (AwardedEnergyBid_Structure.png) draws.

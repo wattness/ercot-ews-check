@@ -1,0 +1,62 @@
+id: D042
+slug: load-ratio-share-diagram-tmpoint
+title: The LoadRatioShare diagram draws a TmSchedule TmPoint with netTrade, multiHourBlock and
+  tradeConfirmedFlag; LoadRatioShare's TmPoint is a ReportsTmPoint without them
+kind: element-path
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Information Messages / Load Ratio Share
+  location: diagram (LoadRatioShare_Structure.png)
+  quote: TmSchedule (extension) ... netTrade ... multiHourBlock ... tradeConfirmedFlag
+  observed: LoadRatioShare is drawn as an extension of TmSchedule, and its TmPoint as time, ending, value1,
+    value2, value3, netTrade, multiHourBlock and tradeConfirmedFlag.
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Load%20Ratio%20Share/
+schema_says:
+  file: ErcotInformationTypes.xsd
+  line: 166
+  rule: LoadRatioShare extends LRSTmSchedule, whose TmPoint is a ReportsTmPoint (ErcotCommonTypes.xsd:838
+    and 940) holding time, ending, value1, value2 and value3, each xs:decimal. netTrade, multiHourBlock
+    and tradeConfirmedFlag belong to TmSchedule's TmPoint and are not allowed here.
+do: Read a LoadRatioShare TmPoint as time, ending and value1 to value3; value1 carries the share.
+lookup:
+  messages:
+  - LoadRatioShares
+  elements:
+  - LoadRatioShare
+  - netTrade
+  - tradeConfirmedFlag
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <LoadRatioShares xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <LoadRatioShare>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <TmPoint>
+          <time>2026-10-15T00:00:00-05:00</time>
+          <value1>0.0123456</value1>
+          <tradeConfirmedFlag>true</tradeConfirmedFlag>
+        </TmPoint>
+      </LoadRatioShare>
+    </LoadRatioShares>
+  valid: |
+    <LoadRatioShares xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <LoadRatioShare>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <TmPoint>
+          <time>2026-10-15T00:00:00-05:00</time>
+          <value1>0.0123456</value1>
+        </TmPoint>
+      </LoadRatioShare>
+    </LoadRatioShares>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/LoadRatioShare_Structure.png
+    sha256: f0e8c1d5de0af5311b7e55cb96f8503dd651cac5bbc5cde2f5149f91497b9631
+  schema:
+    file: ErcotInformationTypes.xsd
+    pattern: <xs:complexType name="LoadRatioShare">\s*<xs:complexContent>\s*<xs:extension base="LRSTmSchedule"/>
+notes: ErcotInformationTypes.xsd's change log dates the switch to LRSTmSchedule to 03/12/2010 (0.3.16).

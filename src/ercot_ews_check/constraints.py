@@ -82,7 +82,10 @@ class Constraint:
 
 def parse_datetime(value: str) -> datetime | None:
     try:
-        dt = datetime.fromisoformat(str(value).strip().replace("Z", "+00:00"))
+        text = str(value).strip().replace("Z", "+00:00")
+        # Python 3.10 reads only 3 or 6 fractional digits; xs:dateTime allows any number.
+        text = re.sub(r"(T\d\d:\d\d:\d\d)\.(\d+)", lambda m: f"{m[1]}.{(m[2] + '00000')[:6]}", text)
+        dt = datetime.fromisoformat(text)
         if dt.tzinfo is not None:
             dt.astimezone(CENTRAL)  # OverflowError within a day of year 1 or year 9999
         return dt
@@ -159,11 +162,24 @@ def _all() -> tuple[dict[str, dict[str, Constraint]], int]:
 
 # Table bounds that ERCOT's Protocols contradict for some resources: reported, not blocking.
 CONTRADICTED_BOUNDS: dict[tuple[str, str], tuple[str, str]] = {
-    ("COP", f"Limits/{name}"): (
+    ("COP", "Limits/hsl"): (
         "the Protocols allow an Energy Storage Resource's HSL and LSL below zero",
         "D033",
-    )
-    for name in ("hsl", "lsl")
+    ),
+    ("COP", "Limits/lsl"): (
+        "the Protocols allow an Energy Storage Resource's HSL and LSL below zero",
+        "D033",
+    ),
+    ("COP", "Limits/hel"): (
+        "the Protocols set no sign for the emergency limits and let an Energy Storage "
+        "Resource's sustained limits go below zero",
+        "D047",
+    ),
+    ("COP", "Limits/lel"): (
+        "the Protocols set no sign for the emergency limits and let an Energy Storage "
+        "Resource's sustained limits go below zero",
+        "D047",
+    ),
 }
 
 

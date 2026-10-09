@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from ercot_ews_check import sources
-from ercot_ews_check.namespaces import MESSAGE, SOAP_ENV, q
+from ercot_ews_check.namespaces import EWS, MESSAGE, NOTIFICATION, SOAP_ENV, namespace, q
 
 VALID, INVALID, UNVERIFIED = "valid", "invalid", "unverified"
 # ERCOT's schemas declare no element more than a few levels below a top-level element.
@@ -17,6 +17,8 @@ MAX_DEPTH = 100
 # Errors kept from one validation; the rest are counted. Explaining an error costs more
 # than finding it, and one stray element repeated can raise one error per copy.
 MAX_ERRORS = 100
+# The message inside each NotificationMessage of a Notify.
+_NOTIFIED = f"{q(NOTIFICATION, 'NotificationMessage')}/{q(NOTIFICATION, 'Message')}/*"
 # Characters (or bytes) handed to expat at a time. A refusal stops the parse at the end
 # of the chunk that holds it, so expat never reads far past a DOCTYPE or a deep nest.
 CHUNK = 1 << 16
@@ -193,19 +195,24 @@ def _structured(err, child_tags: dict[int, tuple[str, ...]]) -> SchemaError:
 
 
 def documents(root: ET.Element) -> list[ET.Element]:
-    """The root, plus each payload inside a RequestMessage or ResponseMessage.
+    """The root, plus each document it carries, and each document those carry.
 
-    Message.xsd lets a Payload hold any element of another namespace unchecked
-    (``xsd:any processContents="skip"``), so validating an envelope alone never checks
-    the BidSet inside it.
+    ERCOT's schemas leave what a document carries unchecked, so validating the outer
+    document alone never checks it. Message.xsd lets a Payload hold any element of another
+    namespace (``xsd:any processContents="skip"``). Notification.xsd holds the message in
+    each NotificationMessage of a Notify in an ``xsd:any processContents="lax"``, and
+    imports no schema that declares one. ErcotGetNotifications.xsd holds the notifications
+    Get Notifications returns, in a NotificationMessages, as ``xsd:any processContents="skip"``.
     """
-    out = [root]
-    payload = root.find(q(MESSAGE, "Payload"))
-    if payload is not None:
-        out.extend(
-            c for c in payload if c.tag.startswith("{") and not c.tag.startswith(f"{{{MESSAGE}}}")
-        )
-    return out
+    if root.tag == q(NOTIFICATION, "Notify"):
+        held = list(root.iterfind(_NOTIFIED))
+    elif root.tag == q(EWS, "NotificationMessages"):
+        held = list(root)
+    elif (payload := root.find(q(MESSAGE, "Payload"))) is not None:
+        held = [c for c in payload if c.tag.startswith("{") and namespace(c.tag) != MESSAGE]
+    else:
+        held = []
+    return [root, *(doc for child in held for doc in documents(child))]
 
 
 def type_names(sch, path: str) -> set[str]:

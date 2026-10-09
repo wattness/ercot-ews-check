@@ -1,0 +1,58 @@
+id: D039
+slug: totalload-diagram-multihrindicator
+title: The TotalLoad diagram names a TmPoint child multiHrIndicator; TmPoint declares multiHourBlock
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Information Messages / Total ERCOT Load - Same as System Load
+  location: diagram (TotalLoad_Structure.png)
+  quote: netTrade ... multiHrIndicator ... tradeConfirmedFlag
+  observed: 'TmPoint is drawn with eight children: time, ending, value1, value2, value3, netTrade,
+    multiHrIndicator and tradeConfirmedFlag.'
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Total%20ERCOT%20Load%20-%20Same%20as%20System%20Load/
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 936
+  rule: TotalLoad extends TmSchedule, whose TmPoint has multiHourBlock between netTrade and
+    tradeConfirmedFlag. No schema declares multiHrIndicator.
+do: Read multiHourBlock.
+lookup:
+  messages:
+  - TotalLoad
+  elements:
+  - multiHrIndicator
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <TotalLoad xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <startTime>2026-10-15T00:00:00-05:00</startTime>
+      <endTime>2026-10-16T00:00:00-05:00</endTime>
+      <TmPoint>
+        <time>2026-10-15T00:00:00-05:00</time>
+        <value1>45000.0</value1>
+        <multiHrIndicator>false</multiHrIndicator>
+      </TmPoint>
+    </TotalLoad>
+  valid: |
+    <TotalLoad xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <startTime>2026-10-15T00:00:00-05:00</startTime>
+      <endTime>2026-10-16T00:00:00-05:00</endTime>
+      <TmPoint>
+        <time>2026-10-15T00:00:00-05:00</time>
+        <value1>45000.0</value1>
+        <multiHourBlock>false</multiHourBlock>
+      </TmPoint>
+    </TotalLoad>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/TotalLoad_Structure.png
+    sha256: 4baf813cd780b56df04ae5991f1c39f131f904d8e20d7ee0388021227af8106e
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: <xs:element name="multiHourBlock" type="xs:boolean" default="false" minOccurs="0"/>\s*<xs:element
+      name="tradeConfirmedFlag"
+notes: The drawing also goes straight from value3 to netTrade. TmPoint gained nspnm_value and ecrsm_value
+  there in 2022 for Self-Arranged AS quantities; the TmPoint drawings on the System Load, Forecasted Load,
+  Market Totals, Total DAM Energy and Energy Trade pages omit them too.

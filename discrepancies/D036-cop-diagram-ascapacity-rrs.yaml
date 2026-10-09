@@ -1,0 +1,99 @@
+id: D036
+slug: cop-diagram-ascapacity-rrs
+title: The COP diagram expands ASCapacity with rrs and no ecrs; the schema has rrsPF, rrsFF, rrsUF and ecrs
+kind: element-name
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Transaction Messages / Current Operating Plan (COP)
+  location: diagram (COP_Structure.png)
+  quote: ASCapacity ... regUp ... regDown ... rrs ... nonSpin
+  observed: Inside the COP diagram, ASCapacity expands to startTime, endTime, regUp, regDown, rrs and
+    nonSpin, and ends there. The same page's ASCapacity diagram (ASCapacity_Structure.png) and its
+    Message Element table give rrsPF, rrsFF, rrsUF and ecrs.
+  url: https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Current%20Operating%20Plan%20%28COP%29/
+schema_says:
+  file: ErcotTransactionTypes.xsd
+  line: 187
+  rule: ASCapacity is startTime, endTime, regUp, regDown, rrsPF, rrsFF, rrsUF, nonSpin and ecrs. The
+    comment on the line above rrsPF records that NPRR863 removed rrs; no schema declares it.
+do: Send rrsPF, rrsFF and rrsUF in place of rrs, and ecrs after nonSpin. Build ASCapacity from the page's
+  separate ASCapacity diagram or its table, not from the COP diagram.
+lookup:
+  products:
+  - COP
+  messages:
+  - BidSet
+  elements:
+  - ASCapacity
+  - rrs
+  - ecrs
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <COP>
+        <resource>RESOURCE1</resource>
+        <ResourceStatus>
+          <startTime>2026-10-15T00:00:00-05:00</startTime>
+          <endTime>2026-10-16T00:00:00-05:00</endTime>
+          <operatingMode>ONL</operatingMode>
+        </ResourceStatus>
+        <Limits>
+          <startTime>2026-10-15T00:00:00-05:00</startTime>
+          <endTime>2026-10-16T00:00:00-05:00</endTime>
+          <hsl>10.0</hsl>
+          <lsl>0.0</lsl>
+          <hel>10.0</hel>
+          <lel>0.0</lel>
+        </Limits>
+        <ASCapacity>
+          <startTime>2026-10-15T00:00:00-05:00</startTime>
+          <endTime>2026-10-16T00:00:00-05:00</endTime>
+          <regUp>0.0</regUp>
+          <regDown>0.0</regDown>
+          <rrs>0.0</rrs>
+          <nonSpin>0.0</nonSpin>
+        </ASCapacity>
+      </COP>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <COP>
+        <resource>RESOURCE1</resource>
+        <ResourceStatus>
+          <startTime>2026-10-15T00:00:00-05:00</startTime>
+          <endTime>2026-10-16T00:00:00-05:00</endTime>
+          <operatingMode>ONL</operatingMode>
+        </ResourceStatus>
+        <Limits>
+          <startTime>2026-10-15T00:00:00-05:00</startTime>
+          <endTime>2026-10-16T00:00:00-05:00</endTime>
+          <hsl>10.0</hsl>
+          <lsl>0.0</lsl>
+          <hel>10.0</hel>
+          <lel>0.0</lel>
+        </Limits>
+        <ASCapacity>
+          <startTime>2026-10-15T00:00:00-05:00</startTime>
+          <endTime>2026-10-16T00:00:00-05:00</endTime>
+          <regUp>0.0</regUp>
+          <regDown>0.0</regDown>
+          <rrsPF>0.0</rrsPF>
+          <rrsFF>0.0</rrsFF>
+          <rrsUF>0.0</rrsUF>
+          <nonSpin>0.0</nonSpin>
+          <ecrs>0.0</ecrs>
+        </ASCapacity>
+      </COP>
+    </BidSet>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/COP_Structure.png
+    sha256: 71a40664f43616c8ff0780e29299143bcf22b0f28d19071fba8639a44d460fb3
+  schema:
+    file: ErcotTransactionTypes.xsd
+    pattern: <xs:element name="rrsPF" type="MWSingleDecimal" minOccurs="0"/>

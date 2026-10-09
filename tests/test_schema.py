@@ -1,6 +1,6 @@
 from ercot_ews_check import schema
 
-from helpers import EWS, EXAMPLES, MSG
+from helpers import EWS, EXAMPLES, MSG, bidset, notify, response
 
 
 def test_examples_validate():
@@ -43,3 +43,20 @@ def test_payload_inside_a_message_is_checked():
     v = schema.validate(xml)
     assert v.state == schema.INVALID
     assert {e.kind for e in v.errors} == {"datatype"}
+
+
+def test_message_inside_a_notify_is_checked():
+    # Notification.xsd checks a notification's message laxly, against no schema that
+    # declares it, so the message and its payload are validated separately.
+    offer = "  <ThreePartOffer>\n    <mRID>QSE1.20261015.TPO.R1</mRID>\n"
+    payload = bidset(offer + "    <status>ERROR</status>\n  </ThreePartOffer>\n")
+    v = schema.validate(notify(response("changed", "BidSet", payload)))
+    assert v.state == schema.INVALID and [e.value for e in v.errors] == ["ERROR"]
+    assert v.schema == "Notification.xsd, Message.xsd, ErcotTransactions.xsd"
+
+
+def test_notifications_that_get_notifications_returns_are_checked():
+    message = response("Created", "BidSet")
+    listed = f'<NotificationMessages xmlns="{EWS}">\n{message}</NotificationMessages>'
+    v = schema.validate(listed)
+    assert v.state == schema.INVALID and [e.kind for e in v.errors] == ["enumeration"]

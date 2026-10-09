@@ -1,6 +1,6 @@
 ---
 name: checking-ews-submissions
-description: Checks ERCOT EWS XML documents (BidSet, ASOnlyOffer, EnergyOnlyOffer, EnergyBid, COP, PTPObligation, RequestMessage, Acknowledge and other EWS messages) against ERCOT's XSDs and the rules in ERCOT's EWS documentation, explains each failure in plain English with the fix, and looks up known discrepancies in ERCOT's documentation by element, value, product or ID. Use when someone asks whether an EWS submission or ERCOT example is valid, why ERCOT rejected one, or whether an ERCOT page or example is wrong.
+description: Checks ERCOT EWS XML documents (BidSet, ASOnlyOffer, EnergyOnlyOffer, EnergyBid, COP, PTPObligation, RequestMessage, Acknowledge and other EWS messages) against ERCOT's XSDs, the rules in ERCOT's EWS documentation and the price, curve and quantity rules in its Market Submission Validation Rules and Nodal Protocols, explains each failure in plain English with the fix, and looks up known discrepancies in ERCOT's documentation by element, value, product or ID. Use when someone asks whether an EWS submission or ERCOT example is valid, why ERCOT rejected one, or whether an ERCOT page or example is wrong.
 license: Apache-2.0
 compatibility: Needs Python 3.10 or later and the ercot-ews-check command-line tool from github.com/wattness/ercot-ews-check. Works offline once installed.
 ---

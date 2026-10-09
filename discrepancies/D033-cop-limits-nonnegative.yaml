@@ -42,6 +42,6 @@ probes:
   schema:
     file: ErcotCommonTypes.xsd
     pattern: <xs:simpleType name="MWSingleDecimal" final="">
-notes: The cited Protocols text covers HSL and LSL only; the table's >=0 on hel and lel is still enforced.
+notes: The cited Protocols text covers HSL and LSL only; D047 covers the table's >=0 on hel and lel.
   The same table carries the ESR state-of-charge fields (maxSOC, minSOC, targetBeginSOC), and its lel row
   repeats the lsl description, 'Low sustained limit in MW'.

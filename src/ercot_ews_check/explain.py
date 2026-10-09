@@ -189,8 +189,8 @@ def explain(e: SchemaError) -> Explanation:
         )
     if e.reason == "unknown root element":
         ns = namespace(e.element)
-        if ns == RETIRED_EWS:
-            hint = " It is in the retired 2007-05 namespace."
+        if ns.startswith(RETIRED_EWS):
+            hint = " It is in a retired 2007-05 namespace."
         elif not ns:
             hint = " It has no namespace; EWS documents declare one."
         else:
@@ -199,6 +199,6 @@ def explain(e: SchemaError) -> Explanation:
             "/",
             f"No EWS schema declares <{name}> as a document root.{hint}",
             "Check the root element's name and namespace.",
-            see(("namespace",), values=(ns,)) if ns == RETIRED_EWS else (),
+            see(("namespace",), values=("2007-05",)) if ns.startswith(RETIRED_EWS) else (),
         )
     return Explanation(where, e.reason, "See the schema rule cited in the message.")

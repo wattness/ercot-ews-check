@@ -21,6 +21,7 @@ from ercot_ews_check import sources
 
 LOOKUP_KEYS = ("products", "messages", "elements", "values", "endpoints")
 KINDS = {
+    "annotation": "the documentation describes an element differently from the schema's annotation",
     "cardinality": "the schema limits how many, or which combination of, elements may appear",
     "default-value": "the documented default differs from the schema's",
     "documentation": "the documentation describes a convention it does not follow",
@@ -39,7 +40,7 @@ KINDS = {
 RESOLUTIONS = {
     "schema-wins": "Follow the schema; the documentation is wrong.",
     "prose-wins": "The schema accepts it, but ERCOT's stated rule does not; follow the prose.",
-    "neither": "Nothing validates it; pick one form and be consistent.",
+    "neither": "Neither source settles it; pick one form and be consistent.",
     "prose-stale": "The page describes something ERCOT has removed.",
 }
 

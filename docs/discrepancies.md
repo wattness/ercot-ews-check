@@ -3,11 +3,11 @@
 Built from `discrepancies/*.yaml` by `scripts/build_index.py`. Edit the YAML, not this file.
 Each entry's probes are re-checked by `ercot-ews-check verify`.
 
-34 entries. Resolutions:
+47 entries. Resolutions:
 
 - `schema-wins`: Follow the schema; the documentation is wrong.
 - `prose-wins`: The schema accepts it, but ERCOT's stated rule does not; follow the prose.
-- `neither`: Nothing validates it; pick one form and be consistent.
+- `neither`: Neither source settles it; pick one form and be consistent.
 - `prose-stale`: The page describes something ERCOT has removed.
 
 | ID | Discrepancy | Kind | Resolution | Status |
@@ -26,7 +26,7 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 | [D012](#d012) | A BidSet response sample writes &lt;severity&gt;error&lt;/severity&gt;; the enumeration is upper case | enumeration-value | schema-wins | open |
 | [D013](#d013) | The 'K, N' marker is defined but no table uses it | documentation | neither | open |
 | [D014](#d014) | Appendix D's ReplayDetection has Created before Nonce, in the wsu and wsse namespaces | element-order | schema-wins | open |
-| [D015](#d015) | Several request tables give Header/Verb capitalised (Get, Change, Cancel, Reply, Created); the enumeration is lower case | enumeration-value | schema-wins | open |
+| [D015](#d015) | Several request and notification tables give Header/Verb capitalised (Get, Change, Cancel, Reply, Created); the enumeration is lower case | enumeration-value | schema-wins | open |
 | [D016](#d016) | Header/Revision 'should be 1 by default'; the schema default is 001 | default-value | neither | open |
 | [D017](#d017) | Per-interface request tables omit ReplayDetection and Revision, which the header requires | required-field | schema-wins | open |
 | [D018](#d018) | Some Market Information pages write Request/startTime, endTime and option in lower case | element-name | schema-wins | open |
@@ -46,15 +46,28 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 | [D032](#d032) | Some samples use the 2007-05 ews namespace; the schemas declare 2007-06 | namespace | schema-wins | open |
 | [D033](#d033) | COP table requires hsl and lsl &gt;= 0; the Protocols allow an ESR's HSL and LSL below zero | value-bound | schema-wins | open |
 | [D034](#d034) | REB table capitalises Resource; the schema and ERCOT's own REB sample use resource | element-name | schema-wins | open |
+| [D035](#d035) | The Message Header diagram draws ReplayDetection's children as wsse:Nonce and wsu:Created; the schema declares Nonce and Created in the message namespace | namespace | schema-wins | open |
+| [D036](#d036) | The COP diagram expands ASCapacity with rrs and no ecrs; the schema has rrsPF, rrsFF, rrsUF and ecrs | element-name | schema-wins | open |
+| [D037](#d037) | The ASO page's price-curve diagram captions OFFEC 'Offline Non-Spin price', as it does OFFNS; the schema documents OFFEC as the Offline ECRS price | annotation | schema-wins | open |
+| [D038](#d038) | The Energy-Only Offer award pages show the AwardedEnergyOffer diagram (resource, startType, combinedCycleName); AwardedEnergyOnlyOffer holds awardedMWh, spp, bidId and sp | element-path | schema-wins | open |
+| [D039](#d039) | The TotalLoad diagram names a TmPoint child multiHrIndicator; TmPoint declares multiHourBlock | element-name | schema-wins | open |
+| [D040](#d040) | The RT15MinPriceAdder diagram names RTRDPECR; the schema, the page's element list and its example have RTRDPECRS | element-name | schema-wins | open |
+| [D041](#d041) | The RTD Indicative Price Adders page draws and names a payload RTDIndicativePriceAdders; no schema declares it | element-name | neither | open |
+| [D042](#d042) | The LoadRatioShare diagram draws a TmSchedule TmPoint with netTrade, multiHourBlock and tradeConfirmedFlag; LoadRatioShare's TmPoint is a ReportsTmPoint without them | element-path | schema-wins | open |
+| [D043](#d043) | The Solar Generation Forecast diagram gives AnalogValue the base type xs:float; the schema's base type is xs:decimal | value-format | schema-wins | open |
+| [D044](#d044) | The SOTG/SODG 15-minute price correction diagram types PriceOriginal and PriceCorrected xs:float; the schema types them xs:decimal | value-format | schema-wins | open |
+| [D045](#d045) | Wind and Solar Generation Forecast tables give Header/Verb create; notification verbs are documented as past tense | documentation | neither | open |
+| [D046](#d046) | api-specs ews/examples/ASOnlyOffer-Example.xml offers On-Non-Spin; the schema's note and the AS Only Offer page say Non-Spin | enumeration-value | schema-wins | open |
+| [D047](#d047) | COP table gives hel and lel &gt;= 0, describing lel as a low sustained limit; the Protocols set no sign for the emergency limits and let an ESR's sustained limits go below zero | value-bound | neither | open |
 
 ## By product
 
-- `ASOffer`: [D002](#d002), [D005](#d005), [D007](#d007)
-- `ASOnlyOffer`: [D001](#d001), [D007](#d007), [D008](#d008), [D029](#d029)
-- `COP`: [D007](#d007), [D009](#d009), [D033](#d033)
+- `ASOffer`: [D002](#d002), [D005](#d005), [D007](#d007), [D037](#d037)
+- `ASOnlyOffer`: [D001](#d001), [D007](#d007), [D008](#d008), [D029](#d029), [D046](#d046)
+- `COP`: [D007](#d007), [D009](#d009), [D033](#d033), [D036](#d036), [D047](#d047)
 - `CRR`: [D003](#d003)
 - `EnergyBid`: [D005](#d005), [D006](#d006), [D007](#d007)
-- `EnergyOnlyOffer`: [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007)
+- `EnergyOnlyOffer`: [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D038](#d038)
 - `IncDecOffer`: [D010](#d010)
 - `PTPObligation`: [D007](#d007)
 - `RTMEnergyBid`: [D034](#d034)
@@ -63,37 +76,49 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 
 - `Acknowledge`: [D021](#d021)
 - `ASObligations`: [D031](#d031)
-- `BidSet`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D029](#d029), [D032](#d032), [D033](#d033), [D034](#d034)
+- `AwardSet`: [D038](#d038)
+- `BidSet`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D029](#d029), [D032](#d032), [D033](#d033), [D034](#d034), [D036](#d036), [D037](#d037), [D046](#d046), [D047](#d047)
 - `Dispute`: [D028](#d028)
-- `ForecastPayload`: [D022](#d022), [D023](#d023), [D024](#d024)
-- `ForecastSolarPayload`: [D024](#d024)
+- `ForecastPayload`: [D022](#d022), [D023](#d023), [D024](#d024), [D045](#d045)
+- `ForecastSolarPayload`: [D024](#d024), [D043](#d043), [D045](#d045)
 - `GetReports`: [D027](#d027)
+- `LoadRatioShares`: [D042](#d042)
 - `Notify`: [D021](#d021)
 - `Offer and Bid Set Errors`: [D011](#d011)
 - `OutageSet`: [D015](#d015), [D020](#d020)
 - `Reports`: [D027](#d027)
-- `RequestMessage`: [D014](#d014), [D015](#d015), [D016](#d016), [D017](#d017), [D018](#d018), [D029](#d029), [D030](#d030)
+- `RequestMessage`: [D014](#d014), [D015](#d015), [D016](#d016), [D017](#d017), [D018](#d018), [D029](#d029), [D030](#d030), [D035](#d035)
 - `ResParametersSet`: [D019](#d019), [D030](#d030)
+- `ResponseMessage`: [D035](#d035), [D045](#d045)
+- `RT15MinPriceAdders`: [D040](#d040)
+- `RTDIndicativePriceAdders`: [D041](#d041)
 - `RTMPriceCorrectionMCPCSCEDs`: [D025](#d025)
+- `RTMPriceCorrectionSOGPRICES`: [D044](#d044)
 - `SCEDMCPCS`: [D025](#d025)
+- `TotalLoad`: [D039](#d039)
 - `VDIs`: [D026](#d026)
 - `WindForecast`: [D022](#d022), [D023](#d023)
 
 ## By element
 
-- `AnalogValue`: [D022](#d022), [D023](#d023), [D024](#d024)
+- `AnalogValue`: [D022](#d022), [D023](#d023), [D024](#d024), [D043](#d043)
+- `ASCapacity`: [D036](#d036)
 - `ASCurveData`: [D008](#d008)
 - `ASOnlyPriceCurve`: [D001](#d001), [D008](#d008)
 - `ASPriceCurve`: [D002](#d002)
+- `asType`: [D046](#d046)
+- `AwardedEnergyOnlyOffer`: [D038](#d038)
 - `bidID`: [D004](#d004)
 - `BidSet`: [D029](#d029)
 - `CappedMCPC`: [D025](#d025)
 - `CappedMCPCOriginal`: [D025](#d025)
+- `combinedCycleName`: [D038](#d038)
 - `ControllableLoadResource`: [D019](#d019)
-- `Created`: [D014](#d014), [D027](#d027)
+- `Created`: [D014](#d014), [D027](#d027), [D035](#d035)
 - `created`: [D027](#d027)
 - `CurveData`: [D001](#d001), [D008](#d008)
 - `curveStyle`: [D006](#d006)
+- `ecrs`: [D036](#d036)
 - `ending`: [D031](#d031)
 - `endTime`: [D002](#d002), [D018](#d018)
 - `EndTime`: [D018](#d018)
@@ -104,17 +129,25 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - `format`: [D027](#d027)
 - `Format`: [D027](#d027)
 - `GenResourceParameters`: [D019](#d019), [D030](#d030)
-- `Header`: [D015](#d015), [D016](#d016), [D017](#d017)
+- `Header`: [D015](#d015), [D016](#d016), [D017](#d017), [D045](#d045)
+- `hel`: [D047](#d047)
 - `hsl`: [D033](#d033)
 - `IncDecOffer`: [D010](#d010)
 - `InstructionType`: [D026](#d026)
-- `Limits`: [D033](#d033)
+- `lel`: [D047](#d047)
+- `Limits`: [D033](#d033), [D047](#d047)
+- `LoadRatioShare`: [D042](#d042)
 - `lsl`: [D033](#d033)
 - `MCPC`: [D025](#d025)
 - `MCPCOriginal`: [D025](#d025)
 - `MinimumReservationPrice`: [D003](#d003)
-- `Nonce`: [D014](#d014)
+- `multiHrIndicator`: [D039](#d039)
+- `netTrade`: [D042](#d042)
+- `Nonce`: [D014](#d014), [D035](#d035)
 - `NonControllableLoadResource`: [D019](#d019)
+- `OFFEC`: [D037](#d037)
+- `OffLineNonSpin`: [D037](#d037)
+- `OFFNS`: [D037](#d037)
 - `operatingMode`: [D009](#d009)
 - `Option`: [D018](#d018)
 - `option`: [D018](#d018)
@@ -123,15 +156,22 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - `plannedStart`: [D020](#d020)
 - `price`: [D003](#d003)
 - `Price`: [D003](#d003)
+- `PriceCorrected`: [D044](#d044)
 - `PriceCurve`: [D002](#d002), [D006](#d006)
-- `ReplayDetection`: [D014](#d014), [D017](#d017), [D030](#d030)
+- `PriceOriginal`: [D044](#d044)
+- `ReplayDetection`: [D014](#d014), [D017](#d017), [D030](#d030), [D035](#d035)
 - `ReplyCode`: [D021](#d021)
-- `resource`: [D034](#d034)
 - `Resource`: [D034](#d034)
+- `resource`: [D038](#d038)
 - `ResourceParameters`: [D019](#d019)
 - `ResourceStatus`: [D009](#d009)
 - `ResParametersSet`: [D030](#d030)
 - `Revision`: [D016](#d016), [D017](#d017)
+- `rrs`: [D036](#d036)
+- `RTDIndicativePriceAdder`: [D041](#d041)
+- `RTDIndicativePriceAdders`: [D041](#d041)
+- `RTRDPECR`: [D040](#d040)
+- `RTRDPECRS`: [D040](#d040)
 - `Schedule`: [D020](#d020)
 - `severity`: [D012](#d012)
 - `sink`: [D003](#d003)
@@ -144,15 +184,17 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - `sp`: [D004](#d004)
 - `startTime`: [D002](#d002), [D018](#d018)
 - `StartTime`: [D018](#d018)
+- `startType`: [D038](#d038)
 - `statistic`: [D022](#d022)
 - `status`: [D011](#d011)
 - `Timestamp`: [D021](#d021)
 - `TimeStamp`: [D021](#d021)
 - `TmPoint`: [D031](#d031)
+- `tradeConfirmedFlag`: [D042](#d042)
 - `type`: [D023](#d023)
 - `UncappedMCPC`: [D025](#d025)
 - `URL`: [D027](#d027)
-- `Verb`: [D015](#d015)
+- `Verb`: [D015](#d015), [D045](#d045)
 - `xvalue`: [D001](#d001)
 - `y1value`: [D001](#d001)
 - `yvalue`: [D001](#d001)
@@ -160,9 +202,9 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 ## By service
 
 - `Dispute Service`: [D028](#d028)
-- `Market Information Service`: [D010](#d010), [D014](#d014), [D018](#d018), [D024](#d024), [D025](#d025), [D031](#d031)
-- `Market Transaction Service`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D014](#d014), [D029](#d029), [D032](#d032), [D033](#d033), [D034](#d034)
-- `Notifications`: [D011](#d011), [D021](#d021), [D022](#d022), [D023](#d023)
+- `Market Information Service`: [D010](#d010), [D014](#d014), [D018](#d018), [D024](#d024), [D025](#d025), [D031](#d031), [D035](#d035), [D038](#d038), [D039](#d039), [D040](#d040), [D041](#d041), [D042](#d042), [D044](#d044)
+- `Market Transaction Service`: [D001](#d001), [D002](#d002), [D003](#d003), [D004](#d004), [D005](#d005), [D006](#d006), [D007](#d007), [D008](#d008), [D009](#d009), [D010](#d010), [D011](#d011), [D012](#d012), [D014](#d014), [D029](#d029), [D032](#d032), [D033](#d033), [D034](#d034), [D035](#d035), [D036](#d036), [D037](#d037), [D046](#d046), [D047](#d047)
+- `Notifications`: [D011](#d011), [D021](#d021), [D022](#d022), [D023](#d023), [D038](#d038), [D043](#d043), [D045](#d045)
 - `Outage Scheduling Service`: [D015](#d015), [D020](#d020)
 - `Report Service`: [D027](#d027)
 - `Resource Parameter Transaction Service`: [D019](#d019), [D030](#d030)
@@ -319,7 +361,7 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 
 ### D015
 
-**Several request tables give Header/Verb capitalised (Get, Change, Cancel, Reply, Created); the enumeration is lower case**
+**Several request and notification tables give Header/Verb capitalised (Get, Change, Cancel, Reply, Created); the enumeration is lower case**
 
 - Kind: enumeration-value (the documentation uses a value the schema enumeration does not allow). Resolution: schema-wins.
 - ERCOT says (Utility Interface Messages / Get SASM ID List; Outage Scheduling Messages / Outage Update, Outage Cancellation, Outage Query; Change Active Notification URL; Confirmed and Unconfirmed Trades; request and response tables): "Header/Verb Get Header/Noun SASMIDList" <https://developer.ercot.com/applications/ews/Utility%20Interface%20Messages/Get%20SASM%20ID%20List/>
@@ -457,7 +499,7 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 **Appendix C's diagram names ErcotDispute.xsd and ErcotDisputeTypes.xsd; the files are ErcotDisputes.xsd and ErcotDisputesTypes.xsd**
 
 - Kind: file-name (the documentation names a file that is not published). Resolution: schema-wins.
-- ERCOT says (Appendices / Appendix C: XSD Relationships for Submissions; diagram (XSD Relationships for Submissions.png)): "ErcotDispute.xsd, ErcotDisputeTypes.xsd" <https://developer.ercot.com/applications/ews/Appendices/Appendix%20C_%20XSD%20Relationships%20for%20Submissions/>
+- ERCOT says (Appendices / Appendix C: XML Schemas for Message and Payload Definitions; diagram (XSD Relationships for Submissions.png)): "ErcotDispute.xsd, ErcotDisputeTypes.xsd" <https://developer.ercot.com/applications/ews/Appendices/Appendix%20C_%20XML%20Schemas%20for%20Message%20and%20Payload%20Definitions/>
 - Schema (`ErcotDisputes.xsd:12`): The published files are ErcotDisputes.xsd and ErcotDisputesTypes.xsd; ErcotDisputes.xsd includes schemaLocation="ErcotDisputesTypes.xsd".
 - Do: Use the plural file names.
 
@@ -518,7 +560,7 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - Schema (`ErcotCommonTypes.xsd:1247`): hsl and lsl are MWSingleDecimal, a plain xs:decimal; negative values validate.
 - Protocols (Nodal Protocols 3.9.1(5)(c)(ii); 2.1, definition of Low Sustained Limit (LSL) for an Energy Storage Resource (ESR). Version of 1 August 2026.): "For ESRs, the HSL may be negative ... [the LSL for an ESR is] expressed as a MW value that may be less than, equal to, or greater than zero" <https://www.ercot.com/mktrules/nprotocols/current>
 - Do: For an Energy Storage Resource, send the HSL and LSL the Protocols define, negative where the resource charges. The checker reports a negative COP hsl or lsl as a warning.
-- Note: The cited Protocols text covers HSL and LSL only; the table's &gt;=0 on hel and lel is still enforced. The same table carries the ESR state-of-charge fields (maxSOC, minSOC, targetBeginSOC), and its lel row repeats the lsl description, 'Low sustained limit in MW'.
+- Note: The cited Protocols text covers HSL and LSL only; D047 covers the table's &gt;=0 on hel and lel. The same table carries the ESR state-of-charge fields (maxSOC, minSOC, targetBeginSOC), and its lel row repeats the lsl description, 'Low sustained limit in MW'.
 
 ### D034
 
@@ -529,3 +571,150 @@ Each entry's probes are re-checked by `ercot-ews-check verify`.
 - Schema (`ErcotTransactionTypes.xsd:292`): RTMEnergyBid declares resource in lower case, as the XML example under the table writes it. XML names are case-sensitive.
 - Do: Write &lt;resource&gt;.
 - Reproduce: `ercot-ews-check reproduce D034`
+
+### D035
+
+**The Message Header diagram draws ReplayDetection's children as wsse:Nonce and wsu:Created; the schema declares Nonce and Created in the message namespace**
+
+- Kind: namespace (an example puts elements in a namespace the schema does not expect). Resolution: schema-wins.
+- ERCOT says (Services Organization; diagram (Message_Header_Structure.png), Message Header): "msg:ReplayDetection ... wsse:Nonce ... wsu:Created" <https://developer.ercot.com/applications/ews/Services%20Organization/#message-header>
+- Observed: The header's named children carry the msg prefix. ReplayDetection's two children are drawn as wsse:Nonce and wsu:Created, in that order, which are the WS-Security elements' names, and the caption under wsu:Created is the WS-Security utility schema's own description of that element.
+- Schema (`Message.xsd:66`): ReplayDetectionType declares Nonce and Created locally (name=, not ref=), typed wsse:EncodedString and wsu:AttributedDateTime. Message.xsd is elementFormDefault qualified, so both elements are in the message namespace; wsse:Nonce and wsu:Created are different elements.
+- Do: Write Nonce and then Created in the message namespace, like the header's other children. Only their types come from WS-Security.
+- Reproduce: `ercot-ews-check reproduce D035`
+- Note: The reproducer binds wsse and wsu to the namespaces Message.xsd imports. D014 records the same two namespaces, in the reverse order, in Appendix D's annotated message.
+
+### D036
+
+**The COP diagram expands ASCapacity with rrs and no ecrs; the schema has rrsPF, rrsFF, rrsUF and ecrs**
+
+- Kind: element-name (the documentation spells an element name the schema does not declare). Resolution: schema-wins.
+- ERCOT says (Market Transaction Messages / Current Operating Plan (COP); diagram (COP_Structure.png)): "ASCapacity ... regUp ... regDown ... rrs ... nonSpin" <https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Current%20Operating%20Plan%20%28COP%29/>
+- Observed: Inside the COP diagram, ASCapacity expands to startTime, endTime, regUp, regDown, rrs and nonSpin, and ends there. The same page's ASCapacity diagram (ASCapacity_Structure.png) and its Message Element table give rrsPF, rrsFF, rrsUF and ecrs.
+- Schema (`ErcotTransactionTypes.xsd:187`): ASCapacity is startTime, endTime, regUp, regDown, rrsPF, rrsFF, rrsUF, nonSpin and ecrs. The comment on the line above rrsPF records that NPRR863 removed rrs; no schema declares it.
+- Do: Send rrsPF, rrsFF and rrsUF in place of rrs, and ecrs after nonSpin. Build ASCapacity from the page's separate ASCapacity diagram or its table, not from the COP diagram.
+- Reproduce: `ercot-ews-check reproduce D036`
+
+### D037
+
+**The ASO page's price-curve diagram captions OFFEC 'Offline Non-Spin price', as it does OFFNS; the schema documents OFFEC as the Offline ECRS price**
+
+- Kind: annotation (the documentation describes an element differently from the schema's annotation). Resolution: schema-wins.
+- ERCOT says (Market Transaction Messages / Ancillary Service Offer (ASO); diagram (PriceCurves_Using_ASPriceCurve.jpg)): "OFFNS ... Offline Non-Spin price ... OFFEC ... Offline Non-Spin price" <https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Ancillary%20Service%20Offer%20%28ASO%29/>
+- Observed: Under OffLineNonSpin, OFFEC carries the same caption as OFFNS, and the drawn sequence is xvalue, OFFNS, OFFEC, block, with no ECRS. The ASPriceCurve diagram on the Ancillary Service Awards and AwardedAS pages captions OFFEC 'Offline ECRS price' and draws ECRS after it.
+- Schema (`ErcotCommonTypes.xsd:662`): In OffLineNonSpin, OFFNS is documented 'Offline Non-Spin price' and OFFEC 'Offline ECRS price', an NPRR863 Phase 2 (ECRS) element used in ASOffer submissions. An optional ECRS element, used in awards, follows OFFEC.
+- Do: Put the Offline Non-Spin price in OFFNS and the Offline ECRS price in OFFEC; OFFEC is not a second Non-Spin price. Expect ECRS inside OffLineNonSpin when reading awards.
+- Note: The page's table names OFFEC without saying what it prices, so the diagram's caption is the page's only description of it. No document can show the caption error, so there is no reproducer.
+
+### D038
+
+**The Energy-Only Offer award pages show the AwardedEnergyOffer diagram (resource, startType, combinedCycleName); AwardedEnergyOnlyOffer holds awardedMWh, spp, bidId and sp**
+
+- Kind: element-path (the documentation places an element under the wrong parent). Resolution: schema-wins.
+- ERCOT says (Market Information Messages / AwardedEnergyOnlyOffer; Notifications Messages / DAM Energy-Only Offer Awards; diagram (AwardedEnergyOnlyOffer_Structure.png)): "AwardedEnergyOffer ... EnergyAward Offer ... resource ... awardedMWh ... startType ... combinedCycleName" <https://developer.ercot.com/applications/ews/Market%20Information%20Messages/AwardedEnergyOnlyOffer/>
+- Observed: Both pages present this image as the AwardedEnergyOnlyOffer structure. Its root is labelled AwardedEnergyOffer, and after the Award fields it draws resource, awardedMWh, startType and combinedCycleName, with no spp, bidId or sp. The Market Information page's own table and XML example list awardedMWh, spp, bidId and sp.
+- Schema (`ErcotAwardTypes.xsd:180`): AwardedEnergyOnlyOffer extends Award with awardedMWh, spp (optional), bidId and sp. resource, startType and combinedCycleName belong to AwardedEnergyOffer (line 108), the Energy Offer award.
+- Do: Read an Energy-Only Offer award as the Award fields followed by awardedMWh, spp, bidId and sp; expect no resource, startType or combinedCycleName.
+- Reproduce: `ercot-ews-check reproduce D038`
+- Note: The Energy Offer award pages' own diagram (AwardedEnergyOffer_Structure.png) draws the same structure. AwardedEnergyOnlyOffer's fields are the same as AwardedEnergyBid's, which the DAM Energy Bid award diagram (AwardedEnergyBid_Structure.png) draws.
+
+### D039
+
+**The TotalLoad diagram names a TmPoint child multiHrIndicator; TmPoint declares multiHourBlock**
+
+- Kind: element-name (the documentation spells an element name the schema does not declare). Resolution: schema-wins.
+- ERCOT says (Market Information Messages / Total ERCOT Load - Same as System Load; diagram (TotalLoad_Structure.png)): "netTrade ... multiHrIndicator ... tradeConfirmedFlag" <https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Total%20ERCOT%20Load%20-%20Same%20as%20System%20Load/>
+- Observed: TmPoint is drawn with eight children: time, ending, value1, value2, value3, netTrade, multiHrIndicator and tradeConfirmedFlag.
+- Schema (`ErcotCommonTypes.xsd:936`): TotalLoad extends TmSchedule, whose TmPoint has multiHourBlock between netTrade and tradeConfirmedFlag. No schema declares multiHrIndicator.
+- Do: Read multiHourBlock.
+- Reproduce: `ercot-ews-check reproduce D039`
+- Note: The drawing also goes straight from value3 to netTrade. TmPoint gained nspnm_value and ecrsm_value there in 2022 for Self-Arranged AS quantities; the TmPoint drawings on the System Load, Forecasted Load, Market Totals, Total DAM Energy and Energy Trade pages omit them too.
+
+### D040
+
+**The RT15MinPriceAdder diagram names RTRDPECR; the schema, the page's element list and its example have RTRDPECRS**
+
+- Kind: element-name (the documentation spells an element name the schema does not declare). Resolution: schema-wins.
+- ERCOT says (Market Information Messages / RT 15-Minute Price Adders; diagram (RT15MinPriceAdder.png)): "RTRDPRRS ... RTRDPECR ... RTRDPNS" <https://developer.ercot.com/applications/ews/Market%20Information%20Messages/RT%2015-Minute%20Price%20Adders/>
+- Observed: RT15MinPriceAdder is drawn with ten children; the eighth is labelled RTRDPECR. The page's list of elements and its XML example use RTRDPECRS.
+- Schema (`ErcotInformationTypes.xsd:339`): RT15MinPriceAdder declares RTRDPECRS (xs:decimal, required) between RTRDPRRS and RTRDPNS. No schema declares RTRDPECR.
+- Do: Read RTRDPECRS.
+- Reproduce: `ercot-ews-check reproduce D040`
+
+### D041
+
+**The RTD Indicative Price Adders page draws and names a payload RTDIndicativePriceAdders; no schema declares it**
+
+- Kind: element-name (the documentation spells an element name the schema does not declare). Resolution: neither.
+- ERCOT says (Market Information Messages / RTD Indicative Price Adders; diagram (RTDIndicativePriceAdders.png), with the request and response tables and the XML example): "RTDIndicativePriceAdders ... RTDIndicativePriceAdder" <https://developer.ercot.com/applications/ews/Market%20Information%20Messages/RTD%20Indicative%20Price%20Adders/>
+- Observed: The diagram draws RTDIndicativePriceAdders holding any number of RTDIndicativePriceAdder. The page's second diagram (RTDIndicativePriceAdder.png) gives that element 28 children, among them BatchID and RTMCPCRUS. The page's tables use RTDIndicativePriceAdders as the noun and the payload, and its XML example has that root.
+- Schema (`ErcotInformation.xsd:211`): The RTD price-adder payload ErcotInformation.xsd declares is RTDPriceAdders, with RTDPriceAdder children (the RTD Price Adders page). No schema declares RTDIndicativePriceAdders, RTDIndicativePriceAdder, RTMCPCRUS or the other RTMCPC elements, and BatchID survives only inside commented-out types, although ErcotInformationTypes.xsd's change log (line 73) says "Added RTDIndicativePriceAdder".
+- Do: Do not expect RTDIndicativePriceAdders replies to validate against the published XSDs; read them by element name. RTDPriceAdders, which the schema declares, is a different report with different fields.
+- Reproduce: `ercot-ews-check reproduce D041`
+- Note: The reproducer has only an invalid document, because nothing declares the element. The page is not marked as removed, unlike RTD Indicative ORDC Price Adders.
+
+### D042
+
+**The LoadRatioShare diagram draws a TmSchedule TmPoint with netTrade, multiHourBlock and tradeConfirmedFlag; LoadRatioShare's TmPoint is a ReportsTmPoint without them**
+
+- Kind: element-path (the documentation places an element under the wrong parent). Resolution: schema-wins.
+- ERCOT says (Market Information Messages / Load Ratio Share; diagram (LoadRatioShare_Structure.png)): "TmSchedule (extension) ... netTrade ... multiHourBlock ... tradeConfirmedFlag" <https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Load%20Ratio%20Share/>
+- Observed: LoadRatioShare is drawn as an extension of TmSchedule, and its TmPoint as time, ending, value1, value2, value3, netTrade, multiHourBlock and tradeConfirmedFlag.
+- Schema (`ErcotInformationTypes.xsd:166`): LoadRatioShare extends LRSTmSchedule, whose TmPoint is a ReportsTmPoint (ErcotCommonTypes.xsd:838 and 940) holding time, ending, value1, value2 and value3, each xs:decimal. netTrade, multiHourBlock and tradeConfirmedFlag belong to TmSchedule's TmPoint and are not allowed here.
+- Do: Read a LoadRatioShare TmPoint as time, ending and value1 to value3; value1 carries the share.
+- Reproduce: `ercot-ews-check reproduce D042`
+- Note: ErcotInformationTypes.xsd's change log dates the switch to LRSTmSchedule to 03/12/2010 (0.3.16).
+
+### D043
+
+**The Solar Generation Forecast diagram gives AnalogValue the base type xs:float; the schema's base type is xs:decimal**
+
+- Kind: value-format (an example writes a value in a form the schema type does not accept). Resolution: schema-wins.
+- ERCOT says (Notifications Messages / Solar Generation Forecast; diagram (Solar_Forecast_AnalogValue_Structure.jpeg)): "Base Type xs:float" <https://developer.ercot.com/applications/ews/Notifications%20Messages/Solar%20Generation%20Forecast/>
+- Observed: The AnalogValue node gives its base type as xs:float, and the base-type box carries the description of xs:float as an IEEE single-precision floating point type. The page's table describes the value as a valid floating point value.
+- Schema (`ErcotSolarQSEForecast.xsd:76`): AnalogValue is simple content extending xs:decimal, as in ErcotForecast.xsd (line 78). xs:decimal has no exponent form, INF or NaN; xs:float has all three.
+- Do: Write AnalogValue as a plain decimal such as 4.4. When reading, also accept the float forms ERCOT's samples use (D024).
+- Reproduce: `ercot-ews-check reproduce D043`
+- Note: D024 records ERCOT's forecast samples writing values such as 1.6E0, a form xs:float allows and xs:decimal does not.
+
+### D044
+
+**The SOTG/SODG 15-minute price correction diagram types PriceOriginal and PriceCorrected xs:float; the schema types them xs:decimal**
+
+- Kind: value-format (an example writes a value in a form the schema type does not accept). Resolution: schema-wins.
+- ERCOT says (Market Information Messages / Price Corrected SOTG/SODG 15-min Prices; diagram (RTMPriceCorrectionSOGPRICE_Structure.png)): "PriceOriginal Type xs:float ... PriceCorrected Type xs:float" <https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Price%20Corrected%20SOTG_SODG%2015-min%20Prices/>
+- Observed: Of the ten children drawn, PriceOriginal and PriceCorrected are typed xs:float; every other drawn type matches the schema.
+- Schema (`ErcotInformationTypes.xsd:408`): RTMPriceCorrectionSOGPRICE declares PriceOriginal and PriceCorrected as xs:decimal (lines 408 and 409). xs:decimal has no exponent form, INF or NaN.
+- Do: Read both prices as decimals rather than binary floating point; a value in exponent form does not validate.
+- Reproduce: `ercot-ews-check reproduce D044`
+
+### D045
+
+**Wind and Solar Generation Forecast tables give Header/Verb create; notification verbs are documented as past tense**
+
+- Kind: documentation (the documentation describes a convention it does not follow). Resolution: neither.
+- ERCOT says (Notifications Messages / Wind Generation Forecast, Solar Generation Forecast; response message structure table): "Header/Verb create Header/Noun WindForecastData" <https://developer.ercot.com/applications/ews/Notifications%20Messages/Wind%20Generation%20Forecast/>
+- Schema (`Message.xsd:79`): HeaderType/Verb enumerates both create (line 79) and created (line 80), so either validates; no schema ties a tense to a notification.
+- Do: In a listener, accept create as well as created on a WindForecastData or SolarForecastData notification, and route on Header/Noun rather than on the verb.
+- Note: Services Organization (Message Header, https://developer.ercot.com/applications/ews/Services%20Organization/#message-header) says notification messages use past-tense verbs, naming created, changed, canceled and closed. Every other notification page's table gives a past-tense verb; Confirmed and Unconfirmed Trades writes it Created, which D015 covers. No ERCOT sample shows the header of a forecast notification.
+
+### D046
+
+**api-specs ews/examples/ASOnlyOffer-Example.xml offers On-Non-Spin; the schema's note and the AS Only Offer page say Non-Spin**
+
+- Kind: enumeration-value (the documentation uses a value the schema enumeration does not allow). Resolution: schema-wins.
+- ERCOT says (github.com/ercot/api-specs: ews/examples/ASOnlyOffer-Example.xml; line 86): "&lt;asType&gt;On-Non-Spin&lt;/asType&gt;" <https://github.com/ercot/api-specs/blob/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/examples/ASOnlyOffer-Example.xml>
+- Schema (`ErcotCommonTypes.xsd:78`): The change note for version 0.3.33 (03/05/2025) says "Non-Spin is used for ASOnlyOffer submission rather than On-Non-Spin", and the AS Only Offer page limits the offer to Reg-Up, Reg-Down, Non-Spin, RRSPF and ECRSS. On-Non-Spin is in the ASType enumeration, so the XSD accepts the example.
+- Do: Write &lt;asType&gt;Non-Spin&lt;/asType&gt; in an AS Only Offer.
+- Reproduce: `ercot-ews-check reproduce D046`
+
+### D047
+
+**COP table gives hel and lel &gt;= 0, describing lel as a low sustained limit; the Protocols set no sign for the emergency limits and let an ESR's sustained limits go below zero**
+
+- Kind: value-bound (the documentation states a bound that ERCOT's rules or schema contradict). Resolution: neither.
+- ERCOT says (Market Transaction Messages / Current Operating Plan (COP); Message Element table): "Limits/hel Y float High emergency limit in MW &gt;=0 Limits/lel Y float Low sustained limit in MW &gt;=0" <https://developer.ercot.com/applications/ews/Market%20Transaction%20Messages/Current%20Operating%20Plan%20%28COP%29/>
+- Schema (`ErcotTransactionTypes.xsd:171`): hel and lel are MWSingleDecimal, a plain xs:decimal; negative values validate.
+- Protocols (Nodal Protocols 2.1, definitions of Low Emergency Limit (LEL) and of Low Sustained Limit (LSL) for an Energy Storage Resource (ESR); 3.9.1(5)(c) to (f). Version of 1 August 2026.): "The limit established by the QSE describing the minimum temporary unsustainable energy production capability of a Resource ... A negative LSL for an ESR describes the maximum sustained energy charging capability of the ESR." <https://www.ercot.com/mktrules/nprotocols/current>
+- Do: Neither source settles whether ERCOT accepts a negative HEL or LEL for an Energy Storage Resource. The checker reports a negative COP hel or lel as a warning, not an error.
+- Note: The lel row repeats the lsl row's description, 'Low sustained limit in MW'. D033 covers hsl and lsl, which the Protocols say may be negative for an ESR. No ERCOT sample shows a negative COP limit.

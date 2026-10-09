@@ -1,0 +1,77 @@
+id: D046
+slug: api-specs-asonlyoffer-example-on-non-spin
+title: api-specs ews/examples/ASOnlyOffer-Example.xml offers On-Non-Spin; the schema's note and the AS
+  Only Offer page say Non-Spin
+kind: enumeration-value
+resolution: schema-wins
+status: open
+ercot_says:
+  page: 'github.com/ercot/api-specs: ews/examples/ASOnlyOffer-Example.xml'
+  location: line 86
+  quote: <asType>On-Non-Spin</asType>
+  url: https://github.com/ercot/api-specs/blob/7e785be50f0b0e5462f7d0e700ba82289f25390e/ews/examples/ASOnlyOffer-Example.xml
+schema_says:
+  file: ErcotCommonTypes.xsd
+  line: 78
+  rule: 'The change note for version 0.3.33 (03/05/2025) says "Non-Spin is used for ASOnlyOffer submission
+    rather than On-Non-Spin", and the AS Only Offer page limits the offer to Reg-Up, Reg-Down, Non-Spin,
+    RRSPF and ECRSS. On-Non-Spin is in the ASType enumeration, so the XSD accepts the example.'
+do: Write <asType>Non-Spin</asType> in an AS Only Offer.
+lookup:
+  products:
+  - ASOnlyOffer
+  messages:
+  - BidSet
+  elements:
+  - asType
+  values:
+  - On-Non-Spin
+  endpoints:
+  - Market Transaction Service
+reproducer:
+  invalid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>On-Non-Spin</asType>
+        <bidID>ns01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>15.50</y1value>
+          </CurveData>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+  valid: |
+    <BidSet xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <tradingDate>2026-10-15</tradingDate>
+      <ASOnlyOffer>
+        <startTime>2026-10-15T00:00:00-05:00</startTime>
+        <endTime>2026-10-16T00:00:00-05:00</endTime>
+        <asType>Non-Spin</asType>
+        <bidID>ns01</bidID>
+        <ASOnlyPriceCurve>
+          <startTime>2026-10-15T14:00:00-05:00</startTime>
+          <endTime>2026-10-15T15:00:00-05:00</endTime>
+          <CurveData>
+            <xvalue>10.0</xvalue>
+            <y1value>15.50</y1value>
+          </CurveData>
+        </ASOnlyPriceCurve>
+      </ASOnlyOffer>
+    </BidSet>
+probes:
+  portal:
+    page: Ancillary%20Service%20Only%20Offer%20%28AOO%29
+    text: 'The offer is limited to the following AS types: Reg-Up, Reg-Down, Non-Spin, RRSPF'
+  file:
+    path: api-specs/ews/examples/ASOnlyOffer-Example.xml
+    sha256: 6b7dd7242559acce710b96ee29fe79629ffb9335d008fe5e657670f00b02e031
+  schema:
+    file: ErcotCommonTypes.xsd
+    pattern: Non-Spin is used for ASOnlyOffer submission rather than On-Non-Spin

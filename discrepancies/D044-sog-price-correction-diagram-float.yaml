@@ -1,0 +1,67 @@
+id: D044
+slug: sog-price-correction-diagram-float
+title: The SOTG/SODG 15-minute price correction diagram types PriceOriginal and PriceCorrected xs:float;
+  the schema types them xs:decimal
+kind: value-format
+resolution: schema-wins
+status: open
+ercot_says:
+  page: Market Information Messages / Price Corrected SOTG/SODG 15-min Prices
+  location: diagram (RTMPriceCorrectionSOGPRICE_Structure.png)
+  quote: PriceOriginal Type xs:float ... PriceCorrected Type xs:float
+  observed: Of the ten children drawn, PriceOriginal and PriceCorrected are typed xs:float; every other
+    drawn type matches the schema.
+  url: https://developer.ercot.com/applications/ews/Market%20Information%20Messages/Price%20Corrected%20SOTG_SODG%2015-min%20Prices/
+schema_says:
+  file: ErcotInformationTypes.xsd
+  line: 408
+  rule: RTMPriceCorrectionSOGPRICE declares PriceOriginal and PriceCorrected as xs:decimal (lines 408 and
+    409). xs:decimal has no exponent form, INF or NaN.
+do: Read both prices as decimals rather than binary floating point; a value in exponent form does not
+  validate.
+lookup:
+  messages:
+  - RTMPriceCorrectionSOGPRICES
+  elements:
+  - PriceOriginal
+  - PriceCorrected
+  endpoints:
+  - Market Information Service
+reproducer:
+  invalid: |
+    <RTMPriceCorrectionSOGPRICES xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <RTMPriceCorrectionSOGPRICE>
+        <DeliveryDate>10/15/2026</DeliveryDate>
+        <DeliveryHour>11</DeliveryHour>
+        <DeliveryInterval>3</DeliveryInterval>
+        <ResourceType>SOTG</ResourceType>
+        <ResourceName>RESOURCE1</ResourceName>
+        <MeterName>METER1</MeterName>
+        <PriceOriginal>3.822E1</PriceOriginal>
+        <PriceCorrected>3.816E1</PriceCorrected>
+        <PriceCorrectionTime>10/16/2026 16:00:00</PriceCorrectionTime>
+        <DSTFlag>N</DSTFlag>
+      </RTMPriceCorrectionSOGPRICE>
+    </RTMPriceCorrectionSOGPRICES>
+  valid: |
+    <RTMPriceCorrectionSOGPRICES xmlns="http://www.ercot.com/schema/2007-06/nodal/ews">
+      <RTMPriceCorrectionSOGPRICE>
+        <DeliveryDate>10/15/2026</DeliveryDate>
+        <DeliveryHour>11</DeliveryHour>
+        <DeliveryInterval>3</DeliveryInterval>
+        <ResourceType>SOTG</ResourceType>
+        <ResourceName>RESOURCE1</ResourceName>
+        <MeterName>METER1</MeterName>
+        <PriceOriginal>38.22</PriceOriginal>
+        <PriceCorrected>38.16</PriceCorrected>
+        <PriceCorrectionTime>10/16/2026 16:00:00</PriceCorrectionTime>
+        <DSTFlag>N</DSTFlag>
+      </RTMPriceCorrectionSOGPRICE>
+    </RTMPriceCorrectionSOGPRICES>
+probes:
+  diagram:
+    path: developer.ercot.com/applications/ews/Images/RTMPriceCorrectionSOGPRICE_Structure.png
+    sha256: 18179c6d880f7da025d7f25fc633d739392c0ca70e67002ab948af69d74c4478
+  schema:
+    file: ErcotInformationTypes.xsd
+    pattern: <xs:element name="PriceOriginal" type="xs:decimal"/>

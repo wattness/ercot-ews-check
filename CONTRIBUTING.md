@@ -34,9 +34,21 @@ Set `status: fixed` in that entry; do not delete it.
   `src/ercot_ews_check/mutate.py` with its target rule in `mutate.TARGET`. Add the rule to the
   README's rule table and to `skills/checking-ews-submissions/references/rules.md`.
 - Update the README block with `python scripts/measure.py` when a figure changes.
+- When a change alters what `check` reports on one of ERCOT's notification samples, run
+  `python scripts/build_notifications.py`; `tests/test_notifications.py` fails until
+  `docs/notifications.md` matches.
 - When a change alters what `ercot-ews-check check examples/broken/as-only-offer.xml` prints, run
   `python scripts/render_terminal.py` to redraw the images in `docs/img/`, and update their alt
   text in README.md; `tests/test_render_terminal.py` fails until the images match.
+
+## ERCOT's market documents
+
+`src/ercot_ews_check/market_rules.py` applies rules from two ERCOT documents that are not vendored:
+the MMS Market Submission Validation Rules (NP4-450-M) and Section 4 of the Nodal Protocols. Its
+comments give the version and SHA-256 of each copy read. Before a release, check ERCOT's index of
+current Protocols and the NP4-450-M page for a newer version; if there is one, re-read the
+sections the module cites, above all the offer caps in §4.4.11(1), which ERCOT's Board changes,
+and update the values, versions and hashes together.
 
 ## Vendored files
 
